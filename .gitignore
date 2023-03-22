@@ -1,0 +1,3 @@
+.mypy_cache
+test/sample*.log
+test/sample*.pptx

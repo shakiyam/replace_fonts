@@ -1,0 +1,30 @@
+#!/bin/bash
+set -eu -o pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+readonly SCRIPT_DIR
+# shellcheck disable=SC1091
+. "$SCRIPT_DIR"/colored_echo.sh
+
+if [[ $(command -v shfmt) ]]; then
+  shfmt "$@"
+elif [[ $(command -v docker) ]]; then
+  docker container run \
+    --name shfmt$$ \
+    --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$PWD":/work:ro \
+    -w /work \
+    docker.io/mvdan/shfmt:latest "$@"
+elif [[ $(command -v podman) ]]; then
+  podman container run \
+    --name shfmt$$ \
+    --rm \
+    --security-opt label=disable \
+    -v "$PWD":/work:ro \
+    -w /work \
+    docker.io/mvdan/shfmt:latest "$@"
+else
+  echo_error 'shfmt could not be executed.'
+  exit 1
+fi

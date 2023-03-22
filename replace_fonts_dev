@@ -1,0 +1,25 @@
+#!/bin/bash
+set -eu -o pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+readonly SCRIPT_DIR
+
+if [[ $(command -v docker) ]]; then
+  docker container run \
+    --name replace_fonts_dev$$ \
+    --rm \
+    -it \
+    -u "$(id -u):$(id -g)" \
+    -v "$PWD":/work \
+    -v "$SCRIPT_DIR"/replace_fonts.py:/replace_fonts.py \
+    ghcr.io/shakiyam/replace_fonts_dev "$@"
+else
+  podman container run \
+    --name replace_fonts_dev$$ \
+    --rm \
+    --security-opt label=disable \
+    -it \
+    -v "$PWD":/work \
+    -v "$SCRIPT_DIR"/replace_fonts.py:/replace_fonts.py \
+    ghcr.io/shakiyam/replace_fonts_dev "$@"
+fi
