@@ -1,6 +1,6 @@
+import argparse
 import os.path
 import shutil
-import sys
 from datetime import datetime
 from typing import Optional
 
@@ -13,7 +13,7 @@ from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-03-22'
+version = '2023-03-23'
 
 
 def log(message: str):
@@ -36,33 +36,45 @@ def backup_file(path):
 def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, text: Optional[str]):
     if pr.find(qn('a:latin')) is not None:
         latin_font_name = pr.find(qn('a:latin')).get('typeface')
-        etree.strip_elements(pr, qn('a:latin'))
-        # run.font._rpr.latin.typeface = 'Meiryo UI'
-        if is_major:
-            if text is not None:
-                log(f'[{text}] Major latin font has been converted from {latin_font_name} to +mj-lt')
+        if args.code and latin_font_name == 'Consolas':
+            if is_major:
+                if text is not None:
+                    log(f'[{text}] Keep major latin font as {latin_font_name}')
+                else:
+                    log(f'Keep major latin font as {latin_font_name}')
             else:
-                log(f'Major latin font has been converted from {latin_font_name} to +mj-lt')
+                if text is not None:
+                    log(f'[{text}] Keep minor latin font as {latin_font_name}')
+                else:
+                    log(f'Keep minor latin font as {latin_font_name}')
         else:
-            if text is not None:
-                log(f'[{text}] Minor latin font has been converted from {latin_font_name} to +mn-lt')
+            etree.strip_elements(pr, qn('a:latin'))
+            # pr.latin.typeface = 'Meiryo UI'
+            if is_major:
+                if text is not None:
+                    log(f'[{text}] Replace major latin font from {latin_font_name} to +mj-lt')
+                else:
+                    log(f'Replace major latin font from {latin_font_name} to +mj-lt')
             else:
-                log(f'Minor latin font has been converted from {latin_font_name} to +mn-lt')
+                if text is not None:
+                    log(f'[{text}] Replace minor latin font from {latin_font_name} to +mn-lt')
+                else:
+                    log(f'Replace minor latin font from {latin_font_name} to +mn-lt')
     if pr.find(qn('a:ea')) is not None:
         ea_font_name = pr.find(qn('a:ea')).get('typeface')
         etree.strip_elements(pr, qn('a:ea'))
-        # ea = etree.SubElement(rpr, qn('a:ea'))
+        # ea = etree.SubElement(pr, qn('a:ea'))
         # ea.set('typeface', 'Meiryo UI')
         if is_major:
             if text is not None:
-                log(f'[{text}] Major east asian font has been converted from {ea_font_name} to +mj-ea')
+                log(f'[{text}] Replace major east asian font from {ea_font_name} to +mj-ea')
             else:
-                log(f'Major east asian font has been converted from {ea_font_name} to +mj-ea')
+                log(f'Replace major east asian font from {ea_font_name} to +mj-ea')
         else:
             if text is not None:
-                log(f'[{text}] Minor east asian font has been converted from {ea_font_name} to +mn-ea')
+                log(f'[{text}] Replace minor east asian font from {ea_font_name} to +mn-ea')
             else:
-                log(f'Minor east asian font has been converted from {ea_font_name} to +mn-ea')
+                log(f'Replace minor east asian font from {ea_font_name} to +mn-ea')
 
 
 def replace_text_frame_fonts(text_frame: TextFrame, is_major: bool):
@@ -94,7 +106,12 @@ def replace_shape_fonts(shape: BaseShape):
 
 print(f'replace_fonts - version {version} by Shinichi Akiyama')
 
-for file in sys.argv[1:]:
+parser = argparse.ArgumentParser()
+parser.add_argument('files', nargs='*')
+parser.add_argument('--code', help='keep fonts of the code', action='store_true')
+args = parser.parse_args()
+
+for file in args.files:
     base, ext = os.path.splitext(file)
     with open(f'{base}.log', 'a') as logfile:
         backup = backup_file(file)
