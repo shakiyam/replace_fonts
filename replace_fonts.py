@@ -67,13 +67,13 @@ def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, tex
 
 def replace_text_frame_fonts(text_frame: TextFrame, is_major: bool):
     for paragraph in text_frame.paragraphs:
+        if paragraph._element.pPr is not None and paragraph._element.pPr.defRPr is not None:
+            replace_properties_fonts(paragraph._element.pPr.defRPr, is_major, None)
         for run in paragraph.runs:
             text = run.text.strip()
-            pr = run.font._element
-            replace_properties_fonts(pr, is_major, text)
-        pr = paragraph._element.endParaRPr
-        if pr is not None:
-            replace_properties_fonts(pr, is_major, None)
+            replace_properties_fonts(run.font._element, is_major, text)
+        if paragraph._element.endParaRPr is not None:
+            replace_properties_fonts(paragraph._element.endParaRPr, is_major, None)
 
 
 def replace_shape_fonts(shape: BaseShape):
