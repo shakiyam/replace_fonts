@@ -28,8 +28,15 @@ Usage
 Specify PowerPoint files as an argument.
 
 ```console
-python replace_fonts.py PPT_FILE...
+python replace_fonts.py [-h] [--code] [files ...]
 ```
+
+Options:
+
+Option     | Description
+-----------|---------------------------
+-h, --help | show help message and exit
+--code     | keep fonts of the code
 
 * replace_fonts will back up the specified file sequentially, open the file, replace the fonts, and save it. (`sample.pptx` is backed up to `sample - backup.pptx`)
 * The replacement status is not only displayed on the screen, but also logged in a log file with the same name as the PowerPoint file. (Font replacements in `sample.pptx` will be logged in `sample.log`)
