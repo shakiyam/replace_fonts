@@ -33,81 +33,61 @@ def backup_file(path: str) -> str:
     return backup
 
 
-def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, text: Optional[str]) -> None:
+def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str, text: Optional[str]) -> None:
+    if major_or_minor == 'major':
+        default_font = {'latin': '+mj-lt', 'east asian': '+mj-ea'}
+    else:
+        default_font = {'latin': '+mn-lt', 'east asian': '+mn-ea'}
     if pr.find(qn('a:latin')) is not None:
-        latin_font_name = pr.find(qn('a:latin')).get('typeface')
-        if args.code and latin_font_name == 'Consolas':
-            if is_major:
-                if text is not None:
-                    log(f'[{text}] Keep major latin font as {latin_font_name}')
-                else:
-                    log(f'Keep major latin font as {latin_font_name}')
+        latin_font = pr.find(qn('a:latin')).get('typeface')
+        if args.code and latin_font == 'Consolas':
+            if text is not None:
+                log(f'[{text}] Keep {major_or_minor} latin font as {latin_font}')
             else:
-                if text is not None:
-                    log(f'[{text}] Keep minor latin font as {latin_font_name}')
-                else:
-                    log(f'Keep minor latin font as {latin_font_name}')
-        elif args.code and latin_font_name == 'Courier New':
+                log(f'Keep {major_or_minor} latin font as {latin_font}')
+        elif args.code and latin_font == 'Courier New':
             pr.find(qn('a:latin')).set('typeface', 'Consolas')
-            if is_major:
-                if text is not None:
-                    log(f'[{text}] Replace major latin font from {latin_font_name} to Consolas')
-                else:
-                    log(f'Replace major latin font from {latin_font_name} to Consolas')
+            if text is not None:
+                log(f'[{text}] Replace {major_or_minor} latin font from {latin_font} to Consolas')
             else:
-                if text is not None:
-                    log(f'[{text}] Replace minor latin font from {latin_font_name} to Consolas')
-                else:
-                    log(f'Replace minor latin font from {latin_font_name} to Consolas')
+                log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas')
         else:
             etree.strip_elements(pr, qn('a:latin'))
-            if is_major:
-                if text is not None:
-                    log(f'[{text}] Replace major latin font from {latin_font_name} to +mj-lt')
-                else:
-                    log(f'Replace major latin font from {latin_font_name} to +mj-lt')
+            if text is not None:
+                log(f"[{text}] Replace {major_or_minor} latin font from {latin_font} to {default_font['latin']}")
             else:
-                if text is not None:
-                    log(f'[{text}] Replace minor latin font from {latin_font_name} to +mn-lt')
-                else:
-                    log(f'Replace minor latin font from {latin_font_name} to +mn-lt')
+                log(f"Replace {major_or_minor} latin font from {latin_font} to  {default_font['latin']}")
     if pr.find(qn('a:ea')) is not None:
-        ea_font_name = pr.find(qn('a:ea')).get('typeface')
+        ea_font = pr.find(qn('a:ea')).get('typeface')
         etree.strip_elements(pr, qn('a:ea'))
-        if is_major:
-            if text is not None:
-                log(f'[{text}] Replace major east asian font from {ea_font_name} to +mj-ea')
-            else:
-                log(f'Replace major east asian font from {ea_font_name} to +mj-ea')
+        if text is not None:
+            log(f"[{text}] Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}")
         else:
-            if text is not None:
-                log(f'[{text}] Replace minor east asian font from {ea_font_name} to +mn-ea')
-            else:
-                log(f'Replace minor east asian font from {ea_font_name} to +mn-ea')
+            log(f"Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}")
 
 
-def replace_text_frame_fonts(text_frame: TextFrame, is_major: bool) -> None:
+def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None:
     for paragraph in text_frame.paragraphs:
         if paragraph._element.pPr is not None and paragraph._element.pPr.defRPr is not None:
-            replace_properties_fonts(paragraph._element.pPr.defRPr, is_major, None)
+            replace_properties_fonts(paragraph._element.pPr.defRPr, major_or_minor, None)
         for run in paragraph.runs:
             text = run.text.strip()
-            replace_properties_fonts(run.font._element, is_major, text)
+            replace_properties_fonts(run.font._element, major_or_minor, text)
         if paragraph._element.endParaRPr is not None:
-            replace_properties_fonts(paragraph._element.endParaRPr, is_major, None)
+            replace_properties_fonts(paragraph._element.endParaRPr, major_or_minor, None)
 
 
 def replace_shape_fonts(shape: BaseShape) -> None:
     if shape.has_text_frame:
         ph = shape.element.find('.//{*}ph')
         if ph is not None and ph.get('type') == 'title':
-            replace_text_frame_fonts(shape.text_frame, True)
+            replace_text_frame_fonts(shape.text_frame, 'major')
         else:
-            replace_text_frame_fonts(shape.text_frame, False)
+            replace_text_frame_fonts(shape.text_frame, 'minor')
     elif shape.has_table:
         for row in shape.table.rows:
             for cell in row.cells:
-                replace_text_frame_fonts(cell.text_frame, False)
+                replace_text_frame_fonts(cell.text_frame, 'minor')
     elif isinstance(shape, GroupShape):
         for item in shape.shapes:
             replace_shape_fonts(item)
