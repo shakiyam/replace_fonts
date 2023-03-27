@@ -13,7 +13,7 @@ from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-03-23'
+version = '2023-03-27'
 
 
 def log(message: str) -> None:
@@ -47,9 +47,20 @@ def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, tex
                     log(f'[{text}] Keep minor latin font as {latin_font_name}')
                 else:
                     log(f'Keep minor latin font as {latin_font_name}')
+        elif args.code and latin_font_name == 'Courier New':
+            pr.find(qn('a:latin')).set('typeface', 'Consolas')
+            if is_major:
+                if text is not None:
+                    log(f'[{text}] Replace major latin font from {latin_font_name} to Consolas')
+                else:
+                    log(f'Replace major latin font from {latin_font_name} to Consolas')
+            else:
+                if text is not None:
+                    log(f'[{text}] Replace minor latin font from {latin_font_name} to Consolas')
+                else:
+                    log(f'Replace minor latin font from {latin_font_name} to Consolas')
         else:
             etree.strip_elements(pr, qn('a:latin'))
-            # pr.latin.typeface = 'Meiryo UI'
             if is_major:
                 if text is not None:
                     log(f'[{text}] Replace major latin font from {latin_font_name} to +mj-lt')
@@ -63,8 +74,6 @@ def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, tex
     if pr.find(qn('a:ea')) is not None:
         ea_font_name = pr.find(qn('a:ea')).get('typeface')
         etree.strip_elements(pr, qn('a:ea'))
-        # ea = etree.SubElement(pr, qn('a:ea'))
-        # ea.set('typeface', 'Meiryo UI')
         if is_major:
             if text is not None:
                 log(f'[{text}] Replace major east asian font from {ea_font_name} to +mj-ea')
