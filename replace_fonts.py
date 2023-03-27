@@ -16,13 +16,13 @@ from pptx.text.text import TextFrame
 version = '2023-03-23'
 
 
-def log(message: str):
+def log(message: str) -> None:
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f'{timestamp} {message}', file=logfile)
     print(f'{timestamp} {message}')
 
 
-def backup_file(path):
+def backup_file(path: str) -> str:
     base, ext = os.path.splitext(path)
     backup = f'{base} - backup{ext}'
     num = 2
@@ -33,7 +33,7 @@ def backup_file(path):
     return backup
 
 
-def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, text: Optional[str]):
+def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, text: Optional[str]) -> None:
     if pr.find(qn('a:latin')) is not None:
         latin_font_name = pr.find(qn('a:latin')).get('typeface')
         if args.code and latin_font_name == 'Consolas':
@@ -77,7 +77,7 @@ def replace_properties_fonts(pr: CT_TextCharacterProperties, is_major: bool, tex
                 log(f'Replace minor east asian font from {ea_font_name} to +mn-ea')
 
 
-def replace_text_frame_fonts(text_frame: TextFrame, is_major: bool):
+def replace_text_frame_fonts(text_frame: TextFrame, is_major: bool) -> None:
     for paragraph in text_frame.paragraphs:
         if paragraph._element.pPr is not None and paragraph._element.pPr.defRPr is not None:
             replace_properties_fonts(paragraph._element.pPr.defRPr, is_major, None)
@@ -88,7 +88,7 @@ def replace_text_frame_fonts(text_frame: TextFrame, is_major: bool):
             replace_properties_fonts(paragraph._element.endParaRPr, is_major, None)
 
 
-def replace_shape_fonts(shape: BaseShape):
+def replace_shape_fonts(shape: BaseShape) -> None:
     if shape.has_text_frame:
         ph = shape.element.find('.//{*}ph')
         if ph is not None and ph.get('type') == 'title':
