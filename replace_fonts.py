@@ -4,8 +4,6 @@ import shutil
 from datetime import datetime
 from typing import Optional
 
-from lxml import etree
-
 from pptx import Presentation
 from pptx.oxml import CT_TextCharacterProperties
 from pptx.oxml.ns import qn
@@ -16,8 +14,10 @@ from pptx.text.text import TextFrame
 version = '2023-03-27'
 
 
-def log(message: str) -> None:
+def log(message: str, text: Optional[str] = None) -> None:
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if text is not None:
+        message = f'[{text}] {message}'
     print(f'{timestamp} {message}', file=logfile)
     print(f'{timestamp} {message}')
 
@@ -33,46 +33,42 @@ def backup_file(path: str) -> str:
     return backup
 
 
-def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str, text: Optional[str]) -> None:
+def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str, text: Optional[str] = None) -> None:
     if major_or_minor == 'major':
         default_font = {'latin': '+mj-lt', 'east asian': '+mj-ea'}
     else:
         default_font = {'latin': '+mn-lt', 'east asian': '+mn-ea'}
     if pr.find(qn('a:latin')) is not None:
         latin_font = pr.find(qn('a:latin')).get('typeface')
-        if text is not None:
-            message = f'[{text}] '
-        else:
-            message = ''
         if args.code and latin_font == 'Consolas':
-            message = message + f'Keep {major_or_minor} latin font as {latin_font}'
+            log(f'Keep {major_or_minor} latin font as {latin_font}', text)
         elif args.code and latin_font == 'Courier New':
             pr.find(qn('a:latin')).set('typeface', 'Consolas')
-            message = message + f'Replace {major_or_minor} latin font from {latin_font} to Consolas'
-        else:
-            etree.strip_elements(pr, qn('a:latin'))
-            message = message + f"Replace {major_or_minor} latin font from {latin_font} to {default_font['latin']}"
-        log(message)
+            log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas', text)
+        elif latin_font != default_font['latin']:
+            pr.find(qn('a:latin')).set('typeface', default_font['latin'])
+            log(f"Replace {major_or_minor} latin font from {latin_font} to {default_font['latin']}", text)
     if pr.find(qn('a:ea')) is not None:
         ea_font = pr.find(qn('a:ea')).get('typeface')
-        etree.strip_elements(pr, qn('a:ea'))
-        if text is not None:
-            message = f'[{text}] '
-        else:
-            message = ''
-        message = message + f"Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}"
-        log(message)
+        if args.code and ea_font == 'Consolas':
+            log(f'Keep {major_or_minor} east asian font as {ea_font}', text)
+        elif args.code and ea_font == 'Courier New':
+            pr.find(qn('a:ea')).set('typeface', 'Consolas')
+            log(f'Replace {major_or_minor} east asian font from {ea_font} to Consolas', text)
+        elif ea_font != default_font['east asian']:
+            pr.find(qn('a:ea')).set('typeface', default_font['east asian'])
+            log(f"Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}", text)
 
 
 def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None:
     for paragraph in text_frame.paragraphs:
         if paragraph._element.pPr is not None and paragraph._element.pPr.defRPr is not None:
-            replace_properties_fonts(paragraph._element.pPr.defRPr, major_or_minor, None)
+            replace_properties_fonts(paragraph._element.pPr.defRPr, major_or_minor)
         for run in paragraph.runs:
             text = run.text.strip()
             replace_properties_fonts(run.font._element, major_or_minor, text)
         if paragraph._element.endParaRPr is not None:
-            replace_properties_fonts(paragraph._element.endParaRPr, major_or_minor, None)
+            replace_properties_fonts(paragraph._element.endParaRPr, major_or_minor)
 
 
 def replace_shape_fonts(shape: BaseShape) -> None:
