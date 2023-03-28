@@ -40,30 +40,28 @@ def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str
         default_font = {'latin': '+mn-lt', 'east asian': '+mn-ea'}
     if pr.find(qn('a:latin')) is not None:
         latin_font = pr.find(qn('a:latin')).get('typeface')
+        if text is not None:
+            message = f'[{text}] '
+        else:
+            message = ''
         if args.code and latin_font == 'Consolas':
-            if text is not None:
-                log(f'[{text}] Keep {major_or_minor} latin font as {latin_font}')
-            else:
-                log(f'Keep {major_or_minor} latin font as {latin_font}')
+            message = message + f'Keep {major_or_minor} latin font as {latin_font}'
         elif args.code and latin_font == 'Courier New':
             pr.find(qn('a:latin')).set('typeface', 'Consolas')
-            if text is not None:
-                log(f'[{text}] Replace {major_or_minor} latin font from {latin_font} to Consolas')
-            else:
-                log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas')
+            message = message + f'Replace {major_or_minor} latin font from {latin_font} to Consolas'
         else:
             etree.strip_elements(pr, qn('a:latin'))
-            if text is not None:
-                log(f"[{text}] Replace {major_or_minor} latin font from {latin_font} to {default_font['latin']}")
-            else:
-                log(f"Replace {major_or_minor} latin font from {latin_font} to  {default_font['latin']}")
+            message = message + f"Replace {major_or_minor} latin font from {latin_font} to {default_font['latin']}"
+        log(message)
     if pr.find(qn('a:ea')) is not None:
         ea_font = pr.find(qn('a:ea')).get('typeface')
         etree.strip_elements(pr, qn('a:ea'))
         if text is not None:
-            log(f"[{text}] Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}")
+            message = f'[{text}] '
         else:
-            log(f"Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}")
+            message = ''
+        message = message + f"Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}"
+        log(message)
 
 
 def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None:
