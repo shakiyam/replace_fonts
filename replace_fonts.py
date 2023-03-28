@@ -11,7 +11,7 @@ from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-03-27'
+version = '2023-03-28'
 
 
 def log(message: str, text: Optional[str] = None) -> None:
