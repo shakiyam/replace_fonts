@@ -107,6 +107,21 @@ for file in args.files:
             log(f'--- Slide {i + 1} ---')
             for shape in slide.shapes:
                 replace_shape_fonts(shape)
+        for i, slide_master in enumerate(presentation.slide_masters):
+            log(f'--- Slide Master {i + 1} ---')
+            tx_styles = slide_master.element.find(qn('p:txStyles'))
+            for tx_style in tx_styles.getchildren():
+                print(tx_style.tag)
+                if tx_style.tag == qn('p:titleStyle'):
+                    major_or_minor = 'major'
+                else:
+                    major_or_minor = 'minor'
+                for list_style in tx_style.getchildren():
+                    if isinstance(list_style, CT_TextCharacterProperties):
+                        replace_properties_fonts(list_style, major_or_minor)
+                    else:
+                        replace_properties_fonts(list_style.find(qn('a:defRPr')), major_or_minor, list_style.tag)
+
         presentation.save(file)
         log(f'{file} was saved.')
 
