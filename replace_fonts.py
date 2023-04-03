@@ -4,14 +4,17 @@ import shutil
 from datetime import datetime
 from typing import Optional
 
+from lxml.etree import _Element
+
 from pptx import Presentation
 from pptx.oxml import CT_TextCharacterProperties
 from pptx.oxml.ns import qn
+from pptx.oxml.text import CT_TextFont
 from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-03-28'
+version = '2023-04-03'
 
 
 def log(message: str, text: Optional[str] = None) -> None:
@@ -33,31 +36,43 @@ def backup_file(path: str) -> str:
     return backup
 
 
-def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str, text: Optional[str] = None) -> None:
+def replace_latin_font(latin: CT_TextFont, major_or_minor: str, text: Optional[str] = None) -> None:
     if major_or_minor == 'major':
-        default_font = {'latin': '+mj-lt', 'east asian': '+mj-ea'}
+        default_font = '+mj-lt'
     else:
-        default_font = {'latin': '+mn-lt', 'east asian': '+mn-ea'}
+        default_font = '+mn-lt'
+    latin_font = latin.get('typeface')
+    if args.code and latin_font == 'Consolas':
+        log(f'Keep {major_or_minor} latin font as {latin_font}', text)
+    elif args.code and latin_font == 'Courier New':
+        latin.set('typeface', 'Consolas')
+        log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas', text)
+    elif latin_font != default_font:
+        latin.set('typeface', default_font)
+        log(f'Replace {major_or_minor} latin font from {latin_font} to {default_font}', text)
+
+
+def replace_ea_font(ea: _Element, major_or_minor: str, text: Optional[str] = None) -> None:
+    if major_or_minor == 'major':
+        default_font = '+mj-ea'
+    else:
+        default_font = '+mn-ea'
+    ea_font = ea.get('typeface')
+    if args.code and ea_font == 'Consolas':
+        log(f'Keep {major_or_minor} east asian font as {ea_font}', text)
+    elif args.code and ea_font == 'Courier New':
+        ea.set('typeface', 'Consolas')
+        log(f'Replace {major_or_minor} east asian font from {ea_font} to Consolas', text)
+    elif ea_font != default_font:
+        ea.set('typeface', default_font)
+        log(f'Replace {major_or_minor} east asian font from {ea_font} to {default_font}', text)
+
+
+def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str, text: Optional[str] = None) -> None:
     if pr.find(qn('a:latin')) is not None:
-        latin_font = pr.find(qn('a:latin')).get('typeface')
-        if args.code and latin_font == 'Consolas':
-            log(f'Keep {major_or_minor} latin font as {latin_font}', text)
-        elif args.code and latin_font == 'Courier New':
-            pr.find(qn('a:latin')).set('typeface', 'Consolas')
-            log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas', text)
-        elif latin_font != default_font['latin']:
-            pr.find(qn('a:latin')).set('typeface', default_font['latin'])
-            log(f"Replace {major_or_minor} latin font from {latin_font} to {default_font['latin']}", text)
+        replace_latin_font(pr.find(qn('a:latin')), major_or_minor, text)
     if pr.find(qn('a:ea')) is not None:
-        ea_font = pr.find(qn('a:ea')).get('typeface')
-        if args.code and ea_font == 'Consolas':
-            log(f'Keep {major_or_minor} east asian font as {ea_font}', text)
-        elif args.code and ea_font == 'Courier New':
-            pr.find(qn('a:ea')).set('typeface', 'Consolas')
-            log(f'Replace {major_or_minor} east asian font from {ea_font} to Consolas', text)
-        elif ea_font != default_font['east asian']:
-            pr.find(qn('a:ea')).set('typeface', default_font['east asian'])
-            log(f"Replace {major_or_minor} east asian font from {ea_font} to {default_font['east asian']}", text)
+        replace_ea_font(pr.find(qn('a:ea')), major_or_minor, text)
 
 
 def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None:
@@ -85,6 +100,11 @@ def replace_shape_fonts(shape: BaseShape) -> None:
     elif isinstance(shape, GroupShape):
         for item in shape.shapes:
             replace_shape_fonts(item)
+    elif shape.has_chart:
+        for latin in shape.chart.element.findall(f".//{qn('a:latin')}"):
+            replace_latin_font(latin, 'minor')
+        for ea in shape.chart.element.findall(f".//{qn('a:ea')}"):
+            replace_ea_font(ea, 'minor')
 
 
 print(f'replace_fonts - version {version} by Shinichi Akiyama')
