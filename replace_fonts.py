@@ -73,7 +73,7 @@ def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None
 
 def replace_shape_fonts(shape: BaseShape) -> None:
     if shape.has_text_frame:
-        ph = shape.element.find('.//{*}ph')
+        ph = shape.element.find(f".//{qn('p:ph')}")
         if ph is not None and ph.get('type') == 'title':
             replace_text_frame_fonts(shape.text_frame, 'major')
         else:
