@@ -14,7 +14,7 @@ from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-04-03'
+version = '2023-04-13'
 
 
 def log(message: str, text: Optional[str] = None) -> None:
@@ -43,7 +43,7 @@ def replace_latin_font(latin: CT_TextFont, major_or_minor: str, text: Optional[s
         default_font = '+mn-lt'
     latin_font = latin.get('typeface')
     if args.code and latin_font == 'Consolas':
-        log(f'Keep {major_or_minor} latin font as {latin_font}', text)
+        log(f'Preserve {major_or_minor} latin font as {latin_font}', text)
     elif args.code and latin_font == 'Courier New':
         latin.set('typeface', 'Consolas')
         log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas', text)
@@ -59,7 +59,7 @@ def replace_ea_font(ea: _Element, major_or_minor: str, text: Optional[str] = Non
         default_font = '+mn-ea'
     ea_font = ea.get('typeface')
     if args.code and ea_font == 'Consolas':
-        log(f'Keep {major_or_minor} east asian font as {ea_font}', text)
+        log(f'Preserve {major_or_minor} east asian font as {ea_font}', text)
     elif args.code and ea_font == 'Courier New':
         ea.set('typeface', 'Consolas')
         log(f'Replace {major_or_minor} east asian font from {ea_font} to Consolas', text)
