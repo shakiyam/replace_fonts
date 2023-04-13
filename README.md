@@ -1,7 +1,7 @@
 replace_fonts
 =============
 
-replace_fonts replaces and unifies fonts in PowerPoint presentation.
+replace_fonts is a tool that replaces and unifies fonts in PowerPoint presentations.
 
 When creating a presentation in PowerPoint, if you copy slides from a presentation created by someone else, the fonts may be different.
 
@@ -25,7 +25,7 @@ pip install python-pptx
 Usage
 -----
 
-Specify PowerPoint files as an argument.
+Specify PowerPoint files as arguments.
 
 ```console
 python replace_fonts.py [-h] [--code] [files ...]
@@ -36,9 +36,9 @@ Options:
 Option     | Description
 -----------|---------------------------
 -h, --help | show help message and exit
---code     | keep fonts of the code
+--code     | preserve code fonts
 
-* replace_fonts will back up the specified file sequentially, open the file, replace the fonts, and save it. (`sample.pptx` is backed up to `sample - backup.pptx`)
+* replace_fonts backs up the specified file sequentially, opens it, replaces the fonts, and saves it. (For example, `sample.pptx` is backed up to `sample - backup.pptx`.)
 * The replacement status is not only displayed on the screen, but also logged in a log file with the same name as the PowerPoint file. (Font replacements in `sample.pptx` will be logged in `sample.log`)
 * The meanings of the theme fonts recorded in the log are as follows
 
