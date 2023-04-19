@@ -22,7 +22,7 @@ prompt-toolkit==3.0.38
     # via ptpython
 ptpython==3.0.23
     # via -r requirements_dev.in
-pygments==2.14.0
+pygments==2.15.1
     # via ptpython
 python-pptx==0.6.21
     # via -r requirements_dev.in
@@ -32,5 +32,5 @@ typing-extensions==4.5.0
     # via mypy
 wcwidth==0.2.6
     # via prompt-toolkit
-xlsxwriter==3.0.9
+xlsxwriter==3.1.0
     # via python-pptx
