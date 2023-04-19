@@ -14,7 +14,7 @@ from pptx.shapes.base import BaseShape
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-04-13'
+version = '2023-04-19'
 
 
 def log(message: str, text: Optional[str] = None) -> None:
@@ -89,7 +89,7 @@ def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None
 def replace_shape_fonts(shape: BaseShape) -> None:
     if shape.has_text_frame:
         ph = shape.element.find(f".//{qn('p:ph')}")
-        if ph is not None and ph.get('type') == 'title':
+        if ph is not None and ph.get('type') in ['ctrTitle', 'title']:
             replace_text_frame_fonts(shape.text_frame, 'major')
         else:
             replace_text_frame_fonts(shape.text_frame, 'minor')
