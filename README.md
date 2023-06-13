@@ -19,7 +19,7 @@ Requirements
 replace_fonts require python-pptx.
 
 ```console
-pip install python-pptx
+python -m pip install python-pptx
 ```
 
 Usage
