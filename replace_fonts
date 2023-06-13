@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eu -o pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+readonly SCRIPT_DIR
+
 if [[ $(command -v docker) ]]; then
   docker container run \
     --name replace_fonts$$ \
@@ -9,7 +12,7 @@ if [[ $(command -v docker) ]]; then
     -u "$(id -u):$(id -g)" \
     -v "$PWD":/work \
     ghcr.io/shakiyam/replace_fonts "$@"
-else
+elif [[ $(command -v podman) ]]; then
   podman container run \
     --name replace_fonts$$ \
     --rm \
@@ -17,4 +20,8 @@ else
     -t \
     -v "$PWD":/work \
     ghcr.io/shakiyam/replace_fonts "$@"
+elif [[ $(command -v python3) ]]; then
+  python3 "$SCRIPT_DIR"/replace_fonts.py "$@"
+elif [[ $(command -v python) ]]; then
+  python "$SCRIPT_DIR"/replace_fonts.py "$@"
 fi
