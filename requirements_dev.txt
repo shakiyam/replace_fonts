@@ -20,7 +20,7 @@ pillow==10.2.0
     # via python-pptx
 prompt-toolkit==3.0.43
     # via ptpython
-ptpython==3.0.25
+ptpython==3.0.26
     # via -r requirements_dev.in
 pygments==2.17.2
     # via ptpython
@@ -28,9 +28,9 @@ python-pptx==0.6.23
     # via -r requirements_dev.in
 tomli==2.0.1
     # via mypy
-typing-extensions==4.9.0
+typing-extensions==4.10.0
     # via mypy
 wcwidth==0.2.13
     # via prompt-toolkit
-xlsxwriter==3.1.9
+xlsxwriter==3.2.0
     # via python-pptx
