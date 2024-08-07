@@ -10,11 +10,13 @@ from pptx import Presentation
 from pptx.oxml import CT_TextCharacterProperties
 from pptx.oxml.ns import qn
 from pptx.oxml.text import CT_TextFont
+from pptx.shapes.autoshape import Shape
 from pptx.shapes.base import BaseShape
+from pptx.shapes.graphfrm import GraphicFrame
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2023-04-19'
+version = '2024-08-07'
 
 
 def log(message: str, text: Optional[str] = None) -> None:
@@ -87,24 +89,24 @@ def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None
 
 
 def replace_shape_fonts(shape: BaseShape) -> None:
-    if shape.has_text_frame:
+    if isinstance(shape, Shape):
         ph = shape.element.find(f".//{qn('p:ph')}")
         if ph is not None and ph.get('type') in ['ctrTitle', 'title']:
             replace_text_frame_fonts(shape.text_frame, 'major')
         else:
             replace_text_frame_fonts(shape.text_frame, 'minor')
-    elif shape.has_table:
+    elif isinstance(shape, GraphicFrame) and shape.has_table:
         for row in shape.table.rows:
             for cell in row.cells:
                 replace_text_frame_fonts(cell.text_frame, 'minor')
-    elif isinstance(shape, GroupShape):
-        for item in shape.shapes:
-            replace_shape_fonts(item)
-    elif shape.has_chart:
+    elif isinstance(shape, GraphicFrame) and shape.has_chart:
         for latin in shape.chart.element.findall(f".//{qn('a:latin')}"):
             replace_latin_font(latin, 'minor')
         for ea in shape.chart.element.findall(f".//{qn('a:ea')}"):
             replace_ea_font(ea, 'minor')
+    elif isinstance(shape, GroupShape):
+        for item in shape.shapes:
+            replace_shape_fonts(item)
 
 
 print(f'replace_fonts - version {version} by Shinichi Akiyama')
