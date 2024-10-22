@@ -54,8 +54,8 @@ test_dev: ## Test replace_fonts
 
 update_requirements: ## Update requirements.txt
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/pip-compile.sh --upgrade
+	@./tools/pip-compile.sh --upgrade --strip-extras
 
 update_requirements_dev: ## Update requirements_dev.txt
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/pip-compile.sh requirements_dev.in --output-file requirements_dev.txt --upgrade
+	@./tools/pip-compile.sh requirements_dev.in --output-file requirements_dev.txt --upgrade --strip-extras
