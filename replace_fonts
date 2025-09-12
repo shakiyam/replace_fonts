@@ -1,12 +1,12 @@
 #!/bin/bash
-set -eu -o pipefail
+set -Eeu -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly SCRIPT_DIR
 
 if command -v docker &>/dev/null; then
   docker container run \
-    --name replace_fonts$$ \
+    --name "replace_fonts_$(uuidgen | head -c8)" \
     --rm \
     -t \
     -u "$(id -u):$(id -g)" \
@@ -14,7 +14,7 @@ if command -v docker &>/dev/null; then
     ghcr.io/shakiyam/replace_fonts "$@"
 elif command -v podman &>/dev/null; then
   podman container run \
-    --name replace_fonts$$ \
+    --name "replace_fonts_$(uuidgen | head -c8)" \
     --rm \
     --security-opt label=disable \
     -t \
