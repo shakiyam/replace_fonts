@@ -6,7 +6,7 @@ ALL_TARGETS := $(shell grep -E -o ^[0-9A-Za-z_-]+: $(MAKEFILE_LIST) | sed 's/://
 .PHONY: $(ALL_TARGETS)
 .DEFAULT_GOAL := help
 
-all: shellcheck shfmt hadolint flake8 update_requirements_dev build_dev mypy test_dev update_requirements build test ## Lint, update requirements.txt, build, and test
+all: lint update_requirements_dev build_dev mypy test_dev update_requirements build test ## Lint, update requirements.txt, build, and test
 
 build: ## Build image replace_fonts from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -29,6 +29,8 @@ help: ## Print this help
 	@echo ''
 	@echo 'Targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9A-Za-z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+lint: flake8 hadolint shellcheck shfmt ## Lint for all dependencies
 
 mypy: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
