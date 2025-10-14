@@ -4,11 +4,17 @@ set -Eeu -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly SCRIPT_DIR
 
+if [[ -t 0 ]]; then
+  TTY_FLAGS="-t"
+else
+  TTY_FLAGS=""
+fi
+
 if command -v docker &>/dev/null; then
   docker container run \
     --name "replace_fonts_$(uuidgen | head -c8)" \
     --rm \
-    -t \
+    $TTY_FLAGS \
     -u "$(id -u):$(id -g)" \
     -v "$PWD":/work \
     ghcr.io/shakiyam/replace_fonts "$@"
@@ -17,7 +23,7 @@ elif command -v podman &>/dev/null; then
     --name "replace_fonts_$(uuidgen | head -c8)" \
     --rm \
     --security-opt label=disable \
-    -t \
+    $TTY_FLAGS \
     -v "$PWD":/work \
     ghcr.io/shakiyam/replace_fonts "$@"
 elif command -v python3 &>/dev/null; then
