@@ -1,7 +1,7 @@
 FROM python:3.14-slim-bookworm
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 COPY requirements.txt /requirements.txt
-# hadolint ignore=DL3013
-RUN python -m pip install --no-cache-dir --upgrade pip && python -m pip install --no-cache-dir -r /requirements.txt
+RUN uv pip install --system --no-cache-dir -r /requirements.txt
 COPY replace_fonts.py /replace_fonts.py
 WORKDIR /work
-ENTRYPOINT ["python", "/replace_fonts.py"]
+ENTRYPOINT ["python3", "/replace_fonts.py"]
