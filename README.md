@@ -18,8 +18,16 @@ Requirements
 
 replace_fonts require python-pptx.
 
+Windows:
+
 ```console
-python -m pip install python-pptx
+py -m pip install python-pptx
+```
+
+Linux/macOS:
+
+```console
+python3 -m pip install python-pptx
 ```
 
 Usage
@@ -27,8 +35,16 @@ Usage
 
 Specify PowerPoint files as arguments.
 
+Windows:
+
 ```console
-python replace_fonts.py [-h] [--code] [files ...]
+py replace_fonts.py [-h] [--code] [files ...]
+```
+
+Linux/macOS:
+
+```console
+python3 replace_fonts.py [-h] [--code] [files ...]
 ```
 
 Options:
@@ -55,8 +71,8 @@ Tips
 If you are using Windows, you may find it useful to add a shortcut to SendTo by doing the following
 
 ```console
-pip install pywin32
-python create_sendto_shortcut.py
+py -m pip install pywin32
+py create_sendto_shortcut.py
 ```
 
 Author
