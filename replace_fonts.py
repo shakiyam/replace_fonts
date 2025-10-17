@@ -18,6 +18,13 @@ from pptx.text.text import TextFrame
 
 version = '2024-08-07'
 
+MAJOR_LATIN_FONT = '+mj-lt'
+MINOR_LATIN_FONT = '+mn-lt'
+MAJOR_EA_FONT = '+mj-ea'
+MINOR_EA_FONT = '+mn-ea'
+PRESERVED_CODE_FONT = 'Consolas'
+REPLACED_CODE_FONTS = ('Courier New',)
+
 
 def log(message: str, text: Optional[str] = None) -> None:
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -40,15 +47,15 @@ def backup_file(path: str) -> str:
 
 def replace_latin_font(latin: CT_TextFont, major_or_minor: str, text: Optional[str] = None) -> None:
     if major_or_minor == 'major':
-        default_font = '+mj-lt'
+        default_font = MAJOR_LATIN_FONT
     else:
-        default_font = '+mn-lt'
+        default_font = MINOR_LATIN_FONT
     latin_font = latin.get('typeface')
-    if args.code and latin_font == 'Consolas':
+    if args.code and latin_font == PRESERVED_CODE_FONT:
         log(f'Preserve {major_or_minor} latin font as {latin_font}', text)
-    elif args.code and latin_font == 'Courier New':
-        latin.set('typeface', 'Consolas')
-        log(f'Replace {major_or_minor} latin font from {latin_font} to Consolas', text)
+    elif args.code and latin_font in REPLACED_CODE_FONTS:
+        latin.set('typeface', PRESERVED_CODE_FONT)
+        log(f'Replace {major_or_minor} latin font from {latin_font} to {PRESERVED_CODE_FONT}', text)
     elif latin_font != default_font:
         latin.set('typeface', default_font)
         log(f'Replace {major_or_minor} latin font from {latin_font} to {default_font}', text)
@@ -56,15 +63,15 @@ def replace_latin_font(latin: CT_TextFont, major_or_minor: str, text: Optional[s
 
 def replace_ea_font(ea: _Element, major_or_minor: str, text: Optional[str] = None) -> None:
     if major_or_minor == 'major':
-        default_font = '+mj-ea'
+        default_font = MAJOR_EA_FONT
     else:
-        default_font = '+mn-ea'
+        default_font = MINOR_EA_FONT
     ea_font = ea.get('typeface')
-    if args.code and ea_font == 'Consolas':
+    if args.code and ea_font == PRESERVED_CODE_FONT:
         log(f'Preserve {major_or_minor} east asian font as {ea_font}', text)
-    elif args.code and ea_font == 'Courier New':
-        ea.set('typeface', 'Consolas')
-        log(f'Replace {major_or_minor} east asian font from {ea_font} to Consolas', text)
+    elif args.code and ea_font in REPLACED_CODE_FONTS:
+        ea.set('typeface', PRESERVED_CODE_FONT)
+        log(f'Replace {major_or_minor} east asian font from {ea_font} to {PRESERVED_CODE_FONT}', text)
     elif ea_font != default_font:
         ea.set('typeface', default_font)
         log(f'Replace {major_or_minor} east asian font from {ea_font} to {default_font}', text)
