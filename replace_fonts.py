@@ -133,7 +133,6 @@ for file in args.files:
             log(f'--- Slide Master {i + 1} ---')
             tx_styles = slide_master.element.find(qn('p:txStyles'))
             for tx_style in tx_styles.getchildren():
-                print(tx_style.tag)
                 if tx_style.tag == qn('p:titleStyle'):
                     major_or_minor = 'major'
                 else:
