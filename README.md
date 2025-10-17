@@ -5,7 +5,7 @@ replace_fonts is a tool that replaces and unifies fonts in PowerPoint presentati
 
 When creating a presentation in PowerPoint, if you copy slides from a presentation created by someone else, the fonts may be different.
 
-We want to unify fonts to create easy-to-understand presentation, but this is not easy for the following reasons.
+We want to unify fonts to create an easy-to-understand presentation, but this is not easy for the following reasons.
 
 * If you change fonts in the slide master, fonts added in text boxes, etc., are out of the scope of change.
 * PowerPoint's "Replace Fonts" function requires specifying the replaced fonts one by one for all fonts used.
@@ -16,7 +16,7 @@ replace_fonts solves this problem. replace_fonts fixes the fonts in a PowerPoint
 Requirements
 ------------
 
-replace_fonts require python-pptx.
+replace_fonts requires python-pptx.
 
 Windows:
 
