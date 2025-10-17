@@ -68,27 +68,27 @@ def replace_latin_font(latin: CT_TextFont, font_type: FontType, text: Optional[s
         log(f'Replace {font_type.value} latin font from {latin_font} to {default_font}', text)
 
 
-def replace_ea_font(ea: _Element, font_type: FontType, text: Optional[str] = None) -> None:
+def replace_ea_font(east_asian: _Element, font_type: FontType, text: Optional[str] = None) -> None:
     if font_type == FontType.MAJOR:
         default_font = MAJOR_EA_FONT
     else:
         default_font = MINOR_EA_FONT
-    ea_font = ea.get('typeface')
+    ea_font = east_asian.get('typeface')
     if args.code and ea_font == PRESERVED_CODE_FONT:
         log(f'Preserve {font_type.value} east asian font as {ea_font}', text)
     elif args.code and ea_font in REPLACED_CODE_FONTS:
-        ea.set('typeface', PRESERVED_CODE_FONT)
+        east_asian.set('typeface', PRESERVED_CODE_FONT)
         log(f'Replace {font_type.value} east asian font from {ea_font} to {PRESERVED_CODE_FONT}', text)
     elif ea_font != default_font:
-        ea.set('typeface', default_font)
+        east_asian.set('typeface', default_font)
         log(f'Replace {font_type.value} east asian font from {ea_font} to {default_font}', text)
 
 
-def replace_properties_fonts(pr: CT_TextCharacterProperties, font_type: FontType, text: Optional[str] = None) -> None:
-    if pr.find(qn('a:latin')) is not None:
-        replace_latin_font(pr.find(qn('a:latin')), font_type, text)
-    if pr.find(qn('a:ea')) is not None:
-        replace_ea_font(pr.find(qn('a:ea')), font_type, text)
+def replace_properties_fonts(properties: CT_TextCharacterProperties, font_type: FontType, text: Optional[str] = None) -> None:
+    if properties.find(qn('a:latin')) is not None:
+        replace_latin_font(properties.find(qn('a:latin')), font_type, text)
+    if properties.find(qn('a:ea')) is not None:
+        replace_ea_font(properties.find(qn('a:ea')), font_type, text)
 
 
 def replace_text_frame_fonts(text_frame: TextFrame, font_type: FontType) -> None:
@@ -116,8 +116,8 @@ def replace_shape_fonts(shape: BaseShape) -> None:
     elif isinstance(shape, GraphicFrame) and shape.has_chart:
         for latin in shape.chart.element.findall(f".//{qn('a:latin')}"):
             replace_latin_font(latin, FontType.MINOR)
-        for ea in shape.chart.element.findall(f".//{qn('a:ea')}"):
-            replace_ea_font(ea, FontType.MINOR)
+        for east_asian in shape.chart.element.findall(f".//{qn('a:ea')}"):
+            replace_ea_font(east_asian, FontType.MINOR)
     elif isinstance(shape, GroupShape):
         for item in shape.shapes:
             replace_shape_fonts(item)
