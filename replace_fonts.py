@@ -2,6 +2,7 @@ import argparse
 import os.path
 import shutil
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 
 from lxml.etree import _Element
@@ -16,7 +17,13 @@ from pptx.shapes.graphfrm import GraphicFrame
 from pptx.shapes.group import GroupShape
 from pptx.text.text import TextFrame
 
-version = '2024-08-07'
+__version__ = '2025-10-17'
+
+
+class FontType(Enum):
+    MAJOR = 'major'
+    MINOR = 'minor'
+
 
 MAJOR_LATIN_FONT = '+mj-lt'
 MINOR_LATIN_FONT = '+mn-lt'
@@ -45,82 +52,82 @@ def backup_file(path: str) -> str:
     return backup
 
 
-def replace_latin_font(latin: CT_TextFont, major_or_minor: str, text: Optional[str] = None) -> None:
-    if major_or_minor == 'major':
+def replace_latin_font(latin: CT_TextFont, font_type: FontType, text: Optional[str] = None) -> None:
+    if font_type == FontType.MAJOR:
         default_font = MAJOR_LATIN_FONT
     else:
         default_font = MINOR_LATIN_FONT
     latin_font = latin.get('typeface')
     if args.code and latin_font == PRESERVED_CODE_FONT:
-        log(f'Preserve {major_or_minor} latin font as {latin_font}', text)
+        log(f'Preserve {font_type.value} latin font as {latin_font}', text)
     elif args.code and latin_font in REPLACED_CODE_FONTS:
         latin.set('typeface', PRESERVED_CODE_FONT)
-        log(f'Replace {major_or_minor} latin font from {latin_font} to {PRESERVED_CODE_FONT}', text)
+        log(f'Replace {font_type.value} latin font from {latin_font} to {PRESERVED_CODE_FONT}', text)
     elif latin_font != default_font:
         latin.set('typeface', default_font)
-        log(f'Replace {major_or_minor} latin font from {latin_font} to {default_font}', text)
+        log(f'Replace {font_type.value} latin font from {latin_font} to {default_font}', text)
 
 
-def replace_ea_font(ea: _Element, major_or_minor: str, text: Optional[str] = None) -> None:
-    if major_or_minor == 'major':
+def replace_ea_font(ea: _Element, font_type: FontType, text: Optional[str] = None) -> None:
+    if font_type == FontType.MAJOR:
         default_font = MAJOR_EA_FONT
     else:
         default_font = MINOR_EA_FONT
     ea_font = ea.get('typeface')
     if args.code and ea_font == PRESERVED_CODE_FONT:
-        log(f'Preserve {major_or_minor} east asian font as {ea_font}', text)
+        log(f'Preserve {font_type.value} east asian font as {ea_font}', text)
     elif args.code and ea_font in REPLACED_CODE_FONTS:
         ea.set('typeface', PRESERVED_CODE_FONT)
-        log(f'Replace {major_or_minor} east asian font from {ea_font} to {PRESERVED_CODE_FONT}', text)
+        log(f'Replace {font_type.value} east asian font from {ea_font} to {PRESERVED_CODE_FONT}', text)
     elif ea_font != default_font:
         ea.set('typeface', default_font)
-        log(f'Replace {major_or_minor} east asian font from {ea_font} to {default_font}', text)
+        log(f'Replace {font_type.value} east asian font from {ea_font} to {default_font}', text)
 
 
-def replace_properties_fonts(pr: CT_TextCharacterProperties, major_or_minor: str, text: Optional[str] = None) -> None:
+def replace_properties_fonts(pr: CT_TextCharacterProperties, font_type: FontType, text: Optional[str] = None) -> None:
     if pr.find(qn('a:latin')) is not None:
-        replace_latin_font(pr.find(qn('a:latin')), major_or_minor, text)
+        replace_latin_font(pr.find(qn('a:latin')), font_type, text)
     if pr.find(qn('a:ea')) is not None:
-        replace_ea_font(pr.find(qn('a:ea')), major_or_minor, text)
+        replace_ea_font(pr.find(qn('a:ea')), font_type, text)
 
 
-def replace_text_frame_fonts(text_frame: TextFrame, major_or_minor: str) -> None:
+def replace_text_frame_fonts(text_frame: TextFrame, font_type: FontType) -> None:
     for paragraph in text_frame.paragraphs:
         if paragraph._element.pPr is not None and paragraph._element.pPr.defRPr is not None:
-            replace_properties_fonts(paragraph._element.pPr.defRPr, major_or_minor)
+            replace_properties_fonts(paragraph._element.pPr.defRPr, font_type)
         for run in paragraph.runs:
             text = run.text.strip()
-            replace_properties_fonts(run.font._element, major_or_minor, text)
+            replace_properties_fonts(run.font._element, font_type, text)
         if paragraph._element.endParaRPr is not None:
-            replace_properties_fonts(paragraph._element.endParaRPr, major_or_minor)
+            replace_properties_fonts(paragraph._element.endParaRPr, font_type)
 
 
 def replace_shape_fonts(shape: BaseShape) -> None:
     if isinstance(shape, Shape):
         ph = shape.element.find(f".//{qn('p:ph')}")
         if ph is not None and ph.get('type') in ['ctrTitle', 'title']:
-            replace_text_frame_fonts(shape.text_frame, 'major')
+            replace_text_frame_fonts(shape.text_frame, FontType.MAJOR)
         else:
-            replace_text_frame_fonts(shape.text_frame, 'minor')
+            replace_text_frame_fonts(shape.text_frame, FontType.MINOR)
     elif isinstance(shape, GraphicFrame) and shape.has_table:
         for row in shape.table.rows:
             for cell in row.cells:
-                replace_text_frame_fonts(cell.text_frame, 'minor')
+                replace_text_frame_fonts(cell.text_frame, FontType.MINOR)
     elif isinstance(shape, GraphicFrame) and shape.has_chart:
         for latin in shape.chart.element.findall(f".//{qn('a:latin')}"):
-            replace_latin_font(latin, 'minor')
+            replace_latin_font(latin, FontType.MINOR)
         for ea in shape.chart.element.findall(f".//{qn('a:ea')}"):
-            replace_ea_font(ea, 'minor')
+            replace_ea_font(ea, FontType.MINOR)
     elif isinstance(shape, GroupShape):
         for item in shape.shapes:
             replace_shape_fonts(item)
 
 
-print(f'replace_fonts - version {version} by Shinichi Akiyama')
+print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('files', nargs='*')
-parser.add_argument('--code', help='keep fonts of the code', action='store_true')
+parser.add_argument('--code', help='preserve code fonts', action='store_true')
 args = parser.parse_args()
 
 for file in args.files:
@@ -141,14 +148,14 @@ for file in args.files:
             tx_styles = slide_master.element.find(qn('p:txStyles'))
             for tx_style in tx_styles.getchildren():
                 if tx_style.tag == qn('p:titleStyle'):
-                    major_or_minor = 'major'
+                    font_type = FontType.MAJOR
                 else:
-                    major_or_minor = 'minor'
+                    font_type = FontType.MINOR
                 for list_style in tx_style.getchildren():
                     if isinstance(list_style, CT_TextCharacterProperties):
-                        replace_properties_fonts(list_style, major_or_minor)
+                        replace_properties_fonts(list_style, font_type)
                     else:
-                        replace_properties_fonts(list_style.find(qn('a:defRPr')), major_or_minor, list_style.tag)
+                        replace_properties_fonts(list_style.find(qn('a:defRPr')), font_type, list_style.tag)
 
         presentation.save(file)
         log(f'{file} was saved.')
