@@ -19,24 +19,24 @@ from pptx.text.text import TextFrame
 __version__ = '2025-10-17'
 
 
-class FontType(Enum):
+class ThemeFont(Enum):
     MAJOR = 'major'
     MINOR = 'minor'
 
 
-class FontCategory(Enum):
-    LATIN = 'latin font'
-    EAST_ASIAN = 'east asian font'
+class FontScript(Enum):
+    LATIN = 'latin'
+    EAST_ASIAN = 'east asian'
 
 
 FONT_MAPPINGS = {
-    FontCategory.LATIN: {
-        FontType.MAJOR: '+mj-lt',
-        FontType.MINOR: '+mn-lt',
+    FontScript.LATIN: {
+        ThemeFont.MAJOR: '+mj-lt',
+        ThemeFont.MINOR: '+mn-lt',
     },
-    FontCategory.EAST_ASIAN: {
-        FontType.MAJOR: '+mj-ea',
-        FontType.MINOR: '+mn-ea',
+    FontScript.EAST_ASIAN: {
+        ThemeFont.MAJOR: '+mj-ea',
+        ThemeFont.MINOR: '+mn-ea',
     },
 }
 
@@ -63,54 +63,54 @@ def backup_file(path: str) -> str:
     return backup
 
 
-def replace_font_element(element: _Element, font_type: FontType, font_category: FontCategory,
+def replace_font_element(element: _Element, theme_font: ThemeFont, font_script: FontScript,
                          text: Optional[str] = None) -> None:
-    default_font = FONT_MAPPINGS[font_category][font_type]
+    default_font = FONT_MAPPINGS[font_script][theme_font]
     current_font = element.get('typeface')
     if args.code and current_font == PRESERVED_CODE_FONT:
-        log(f'Preserve {font_type.value} {font_category.value} as {current_font}', text)
+        log(f'Preserve {theme_font.value} {font_script.value} as {current_font}', text)
     elif args.code and current_font in REPLACED_CODE_FONTS:
         element.set('typeface', PRESERVED_CODE_FONT)
-        log(f'Replace {font_type.value} {font_category.value} from {current_font} to {PRESERVED_CODE_FONT}', text)
+        log(f'Replace {theme_font.value} {font_script.value} from {current_font} to {PRESERVED_CODE_FONT}', text)
     elif current_font != default_font:
         element.set('typeface', default_font)
-        log(f'Replace {font_type.value} {font_category.value} from {current_font} to {default_font}', text)
+        log(f'Replace {theme_font.value} {font_script.value} from {current_font} to {default_font}', text)
 
 
-def replace_properties_fonts(properties: CT_TextCharacterProperties, font_type: FontType, text: Optional[str] = None) -> None:
+def replace_properties_fonts(properties: CT_TextCharacterProperties, theme_font: ThemeFont, text: Optional[str] = None) -> None:
     if properties.find(qn('a:latin')) is not None:
-        replace_font_element(properties.find(qn('a:latin')), font_type, FontCategory.LATIN, text)
+        replace_font_element(properties.find(qn('a:latin')), theme_font, FontScript.LATIN, text)
     if properties.find(qn('a:ea')) is not None:
-        replace_font_element(properties.find(qn('a:ea')), font_type, FontCategory.EAST_ASIAN, text)
+        replace_font_element(properties.find(qn('a:ea')), theme_font, FontScript.EAST_ASIAN, text)
 
 
-def replace_text_frame_fonts(text_frame: TextFrame, font_type: FontType) -> None:
+def replace_text_frame_fonts(text_frame: TextFrame, theme_font: ThemeFont) -> None:
     for paragraph in text_frame.paragraphs:
         if paragraph._element.pPr is not None and paragraph._element.pPr.defRPr is not None:
-            replace_properties_fonts(paragraph._element.pPr.defRPr, font_type)
+            replace_properties_fonts(paragraph._element.pPr.defRPr, theme_font)
         for run in paragraph.runs:
             text = run.text.strip()
-            replace_properties_fonts(run.font._element, font_type, text)
+            replace_properties_fonts(run.font._element, theme_font, text)
         if paragraph._element.endParaRPr is not None:
-            replace_properties_fonts(paragraph._element.endParaRPr, font_type)
+            replace_properties_fonts(paragraph._element.endParaRPr, theme_font)
 
 
 def replace_shape_fonts(shape: BaseShape) -> None:
     if isinstance(shape, Shape):
         ph = shape.element.find(f".//{qn('p:ph')}")
         if ph is not None and ph.get('type') in ['ctrTitle', 'title']:
-            replace_text_frame_fonts(shape.text_frame, FontType.MAJOR)
+            replace_text_frame_fonts(shape.text_frame, ThemeFont.MAJOR)
         else:
-            replace_text_frame_fonts(shape.text_frame, FontType.MINOR)
+            replace_text_frame_fonts(shape.text_frame, ThemeFont.MINOR)
     elif isinstance(shape, GraphicFrame) and shape.has_table:
         for row in shape.table.rows:
             for cell in row.cells:
-                replace_text_frame_fonts(cell.text_frame, FontType.MINOR)
+                replace_text_frame_fonts(cell.text_frame, ThemeFont.MINOR)
     elif isinstance(shape, GraphicFrame) and shape.has_chart:
         for latin in shape.chart.element.findall(f".//{qn('a:latin')}"):
-            replace_font_element(latin, FontType.MINOR, FontCategory.LATIN)
+            replace_font_element(latin, ThemeFont.MINOR, FontScript.LATIN)
         for east_asian in shape.chart.element.findall(f".//{qn('a:ea')}"):
-            replace_font_element(east_asian, FontType.MINOR, FontCategory.EAST_ASIAN)
+            replace_font_element(east_asian, ThemeFont.MINOR, FontScript.EAST_ASIAN)
     elif isinstance(shape, GroupShape):
         for item in shape.shapes:
             replace_shape_fonts(item)
@@ -141,14 +141,14 @@ for file in args.files:
             tx_styles = slide_master.element.find(qn('p:txStyles'))
             for tx_style in tx_styles.getchildren():
                 if tx_style.tag == qn('p:titleStyle'):
-                    font_type = FontType.MAJOR
+                    theme_font = ThemeFont.MAJOR
                 else:
-                    font_type = FontType.MINOR
+                    theme_font = ThemeFont.MINOR
                 for list_style in tx_style.getchildren():
                     if isinstance(list_style, CT_TextCharacterProperties):
-                        replace_properties_fonts(list_style, font_type)
+                        replace_properties_fonts(list_style, theme_font)
                     else:
-                        replace_properties_fonts(list_style.find(qn('a:defRPr')), font_type, list_style.tag)
+                        replace_properties_fonts(list_style.find(qn('a:defRPr')), theme_font, list_style.tag)
 
         presentation.save(file)
         log(f'{file} was saved.')
