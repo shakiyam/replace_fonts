@@ -120,24 +120,21 @@ def replace_properties_fonts(
     logfile,
     element_text: Optional[str] = None,
 ) -> None:
-    if properties.find(qn('a:latin')) is not None:
-        replace_font_element(
-            properties.find(qn('a:latin')),
-            theme_font,
-            FontScript.LATIN,
-            preserve_code_fonts,
-            logfile,
-            element_text,
-        )
-    if properties.find(qn('a:ea')) is not None:
-        replace_font_element(
-            properties.find(qn('a:ea')),
-            theme_font,
-            FontScript.EAST_ASIAN,
-            preserve_code_fonts,
-            logfile,
-            element_text,
-        )
+    font_elements = [
+        (qn('a:latin'), FontScript.LATIN),
+        (qn('a:ea'), FontScript.EAST_ASIAN),
+    ]
+    for qname, font_script in font_elements:
+        element = properties.find(qname)
+        if element is not None:
+            replace_font_element(
+                element,
+                theme_font,
+                font_script,
+                preserve_code_fonts,
+                logfile,
+                element_text,
+            )
 
 
 def replace_text_frame_fonts(
@@ -175,54 +172,61 @@ def replace_text_frame_fonts(
             )
 
 
+def replace_shape_text_fonts(
+    shape: Shape, preserve_code_fonts: bool, logfile
+) -> None:
+    placeholder = shape.element.find(f".//{qn('p:ph')}")
+    if placeholder is not None and placeholder.get('type') in ['ctrTitle', 'title']:
+        theme_font = ThemeFont.MAJOR
+    else:
+        theme_font = ThemeFont.MINOR
+    replace_text_frame_fonts(
+        shape.text_frame, theme_font, preserve_code_fonts, logfile
+    )
+
+
+def replace_table_fonts(
+    shape: GraphicFrame, preserve_code_fonts: bool, logfile
+) -> None:
+    for row in shape.table.rows:
+        for cell in row.cells:
+            replace_text_frame_fonts(
+                cell.text_frame, ThemeFont.MINOR, preserve_code_fonts, logfile
+            )
+
+
+def replace_chart_fonts(
+    shape: GraphicFrame, preserve_code_fonts: bool, logfile
+) -> None:
+    font_elements = [
+        (qn('a:latin'), FontScript.LATIN),
+        (qn('a:ea'), FontScript.EAST_ASIAN),
+    ]
+    for qname, font_script in font_elements:
+        for element in shape.chart.element.findall(f'.//{qname}'):
+            replace_font_element(
+                element, ThemeFont.MINOR, font_script, preserve_code_fonts, logfile
+            )
+
+
+def replace_group_fonts(
+    shape: GroupShape, preserve_code_fonts: bool, logfile
+) -> None:
+    for item in shape.shapes:
+        replace_shape_fonts(item, preserve_code_fonts, logfile)
+
+
 def replace_shape_fonts(
     shape: BaseShape, preserve_code_fonts: bool, logfile
 ) -> None:
     if isinstance(shape, Shape):
-        placeholder = shape.element.find(f".//{qn('p:ph')}")
-        if placeholder is not None and placeholder.get('type') in ['ctrTitle', 'title']:
-            replace_text_frame_fonts(
-                shape.text_frame,
-                ThemeFont.MAJOR,
-                preserve_code_fonts,
-                logfile,
-            )
-        else:
-            replace_text_frame_fonts(
-                shape.text_frame,
-                ThemeFont.MINOR,
-                preserve_code_fonts,
-                logfile,
-            )
+        replace_shape_text_fonts(shape, preserve_code_fonts, logfile)
     elif isinstance(shape, GraphicFrame) and shape.has_table:
-        for row in shape.table.rows:
-            for cell in row.cells:
-                replace_text_frame_fonts(
-                    cell.text_frame,
-                    ThemeFont.MINOR,
-                    preserve_code_fonts,
-                    logfile,
-                )
+        replace_table_fonts(shape, preserve_code_fonts, logfile)
     elif isinstance(shape, GraphicFrame) and shape.has_chart:
-        for latin in shape.chart.element.findall(f".//{qn('a:latin')}"):
-            replace_font_element(
-                latin,
-                ThemeFont.MINOR,
-                FontScript.LATIN,
-                preserve_code_fonts,
-                logfile,
-            )
-        for east_asian in shape.chart.element.findall(f".//{qn('a:ea')}"):
-            replace_font_element(
-                east_asian,
-                ThemeFont.MINOR,
-                FontScript.EAST_ASIAN,
-                preserve_code_fonts,
-                logfile,
-            )
+        replace_chart_fonts(shape, preserve_code_fonts, logfile)
     elif isinstance(shape, GroupShape):
-        for item in shape.shapes:
-            replace_shape_fonts(item, preserve_code_fonts, logfile)
+        replace_group_fonts(shape, preserve_code_fonts, logfile)
 
 
 def process_slides(slides, preserve_code_fonts: bool, logfile) -> None:
@@ -236,12 +240,12 @@ def process_slide_masters(slide_masters, preserve_code_fonts: bool, logfile) -> 
     for i, slide_master in enumerate(slide_masters):
         log(logfile, f'--- Slide Master {i + 1} ---')
         text_styles = slide_master.element.find(qn('p:txStyles'))
-        for text_style in text_styles.getchildren():
+        for text_style in text_styles:
             if text_style.tag == qn('p:titleStyle'):
                 theme_font = ThemeFont.MAJOR
             else:
                 theme_font = ThemeFont.MINOR
-            for list_style in text_style.getchildren():
+            for list_style in text_style:
                 if isinstance(list_style, CT_TextCharacterProperties):
                     replace_properties_fonts(
                         list_style,
