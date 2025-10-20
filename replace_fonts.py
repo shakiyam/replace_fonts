@@ -10,6 +10,7 @@ from lxml.etree import _Element
 from pptx import Presentation
 from pptx.oxml import CT_TextCharacterProperties
 from pptx.oxml.ns import qn
+from pptx.presentation import Presentation as PresentationType
 from pptx.shapes.autoshape import Shape
 from pptx.shapes.base import BaseShape
 from pptx.shapes.graphfrm import GraphicFrame
@@ -207,6 +208,62 @@ def replace_shape_fonts(
             replace_shape_fonts(item, preserve_code_fonts, logfile)
 
 
+def process_slides(slides, preserve_code_fonts: bool, logfile) -> None:
+    for i, slide in enumerate(slides):
+        log(logfile, f'--- Slide {i + 1} ---')
+        for shape in slide.shapes:
+            replace_shape_fonts(shape, preserve_code_fonts, logfile)
+
+
+def process_slide_masters(slide_masters, preserve_code_fonts: bool, logfile) -> None:
+    for i, slide_master in enumerate(slide_masters):
+        log(logfile, f'--- Slide Master {i + 1} ---')
+        tx_styles = slide_master.element.find(qn('p:txStyles'))
+        for tx_style in tx_styles.getchildren():
+            if tx_style.tag == qn('p:titleStyle'):
+                theme_font = ThemeFont.MAJOR
+            else:
+                theme_font = ThemeFont.MINOR
+            for list_style in tx_style.getchildren():
+                if isinstance(list_style, CT_TextCharacterProperties):
+                    replace_properties_fonts(
+                        list_style,
+                        theme_font,
+                        preserve_code_fonts,
+                        logfile,
+                    )
+                else:
+                    replace_properties_fonts(
+                        list_style.find(qn('a:defRPr')),
+                        theme_font,
+                        preserve_code_fonts,
+                        logfile,
+                        list_style.tag,
+                    )
+
+
+def process_presentation(
+    presentation: PresentationType, preserve_code_fonts: bool, logfile
+) -> None:
+    process_slides(presentation.slides, preserve_code_fonts, logfile)
+    process_slide_masters(presentation.slide_masters, preserve_code_fonts, logfile)
+
+
+def process_file(file: str, preserve_code_fonts: bool) -> None:
+    base, ext = os.path.splitext(file)
+    with open(f'{base}.log', 'a') as logfile:
+        backup = backup_file(file)
+        log(logfile, f'{file} was backed up to {backup}.')
+
+        presentation = Presentation(file)
+        log(logfile, f'{file} was opened.')
+
+        process_presentation(presentation, preserve_code_fonts, logfile)
+
+        presentation.save(file)
+        log(logfile, f'{file} was saved.')
+
+
 def main():
     print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
 
@@ -217,45 +274,7 @@ def main():
     preserve_code_fonts = args.code
 
     for file in args.files:
-        base, ext = os.path.splitext(file)
-        with open(f'{base}.log', 'a') as logfile:
-            backup = backup_file(file)
-            log(logfile, f'{file} was backed up to {backup}.')
-
-            presentation = Presentation(file)
-            log(logfile, f'{file} was opened.')
-
-            for i, slide in enumerate(presentation.slides):
-                log(logfile, f'--- Slide {i + 1} ---')
-                for shape in slide.shapes:
-                    replace_shape_fonts(shape, preserve_code_fonts, logfile)
-            for i, slide_master in enumerate(presentation.slide_masters):
-                log(logfile, f'--- Slide Master {i + 1} ---')
-                tx_styles = slide_master.element.find(qn('p:txStyles'))
-                for tx_style in tx_styles.getchildren():
-                    if tx_style.tag == qn('p:titleStyle'):
-                        theme_font = ThemeFont.MAJOR
-                    else:
-                        theme_font = ThemeFont.MINOR
-                    for list_style in tx_style.getchildren():
-                        if isinstance(list_style, CT_TextCharacterProperties):
-                            replace_properties_fonts(
-                                list_style,
-                                theme_font,
-                                preserve_code_fonts,
-                                logfile,
-                            )
-                        else:
-                            replace_properties_fonts(
-                                list_style.find(qn('a:defRPr')),
-                                theme_font,
-                                preserve_code_fonts,
-                                logfile,
-                                list_style.tag,
-                            )
-
-            presentation.save(file)
-            log(logfile, f'{file} was saved.')
+        process_file(file, preserve_code_fonts)
 
     print('All files were processed.')
 
