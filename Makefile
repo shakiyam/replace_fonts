@@ -18,7 +18,7 @@ build_dev: ## Build image replace_fonts_dev from Dockerfile_dev
 
 flake8: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/flake8.sh --ignore=E501
+	@./tools/flake8.sh --max-line-length=88
 
 hadolint: ## Lint Dockerfile
 	@echo -e "\033[36m$@\033[0m"
