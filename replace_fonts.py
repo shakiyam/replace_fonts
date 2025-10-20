@@ -117,42 +117,47 @@ def replace_shape_fonts(shape: BaseShape, preserve_code_fonts: bool, logfile) ->
             replace_shape_fonts(item, preserve_code_fonts, logfile)
 
 
-print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
+def main():
+    print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
 
-parser = argparse.ArgumentParser()
-parser.add_argument('files', nargs='*')
-parser.add_argument('--code', help='preserve code fonts', action='store_true')
-args = parser.parse_args()
-preserve_code_fonts = args.code
+    parser = argparse.ArgumentParser()
+    parser.add_argument('files', nargs='*')
+    parser.add_argument('--code', help='preserve code fonts', action='store_true')
+    args = parser.parse_args()
+    preserve_code_fonts = args.code
 
-for file in args.files:
-    base, ext = os.path.splitext(file)
-    with open(f'{base}.log', 'a') as logfile:
-        backup = backup_file(file)
-        log(logfile, f'{file} was backed up to {backup}.')
+    for file in args.files:
+        base, ext = os.path.splitext(file)
+        with open(f'{base}.log', 'a') as logfile:
+            backup = backup_file(file)
+            log(logfile, f'{file} was backed up to {backup}.')
 
-        presentation = Presentation(file)
-        log(logfile, f'{file} was opened.')
+            presentation = Presentation(file)
+            log(logfile, f'{file} was opened.')
 
-        for i, slide in enumerate(presentation.slides):
-            log(logfile, f'--- Slide {i + 1} ---')
-            for shape in slide.shapes:
-                replace_shape_fonts(shape, preserve_code_fonts, logfile)
-        for i, slide_master in enumerate(presentation.slide_masters):
-            log(logfile, f'--- Slide Master {i + 1} ---')
-            tx_styles = slide_master.element.find(qn('p:txStyles'))
-            for tx_style in tx_styles.getchildren():
-                if tx_style.tag == qn('p:titleStyle'):
-                    theme_font = ThemeFont.MAJOR
-                else:
-                    theme_font = ThemeFont.MINOR
-                for list_style in tx_style.getchildren():
-                    if isinstance(list_style, CT_TextCharacterProperties):
-                        replace_properties_fonts(list_style, theme_font, preserve_code_fonts, logfile)
+            for i, slide in enumerate(presentation.slides):
+                log(logfile, f'--- Slide {i + 1} ---')
+                for shape in slide.shapes:
+                    replace_shape_fonts(shape, preserve_code_fonts, logfile)
+            for i, slide_master in enumerate(presentation.slide_masters):
+                log(logfile, f'--- Slide Master {i + 1} ---')
+                tx_styles = slide_master.element.find(qn('p:txStyles'))
+                for tx_style in tx_styles.getchildren():
+                    if tx_style.tag == qn('p:titleStyle'):
+                        theme_font = ThemeFont.MAJOR
                     else:
-                        replace_properties_fonts(list_style.find(qn('a:defRPr')), theme_font, preserve_code_fonts, logfile, list_style.tag)
+                        theme_font = ThemeFont.MINOR
+                    for list_style in tx_style.getchildren():
+                        if isinstance(list_style, CT_TextCharacterProperties):
+                            replace_properties_fonts(list_style, theme_font, preserve_code_fonts, logfile)
+                        else:
+                            replace_properties_fonts(list_style.find(qn('a:defRPr')), theme_font, preserve_code_fonts, logfile, list_style.tag)
 
-        presentation.save(file)
-        log(logfile, f'{file} was saved.')
+            presentation.save(file)
+            log(logfile, f'{file} was saved.')
 
-print('All files were processed.')
+    print('All files were processed.')
+
+
+if __name__ == '__main__':
+    main()
