@@ -45,10 +45,10 @@ PRESERVED_CODE_FONT = 'Consolas'
 REPLACED_CODE_FONTS = ('Courier New',)
 
 
-def log(logfile, message: str, text: Optional[str] = None) -> None:
+def log(logfile, message: str, element_text: Optional[str] = None) -> None:
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    if text is not None:
-        message = f'[{text}] {message}'
+    if element_text is not None:
+        message = f'[{element_text}] {message}'
     print(f'{timestamp} {message}', file=logfile)
     print(f'{timestamp} {message}')
 
