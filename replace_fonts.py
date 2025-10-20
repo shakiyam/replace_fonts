@@ -53,6 +53,24 @@ def log(logfile, message: str, text: Optional[str] = None) -> None:
     print(f'{timestamp} {message}')
 
 
+def log_font_action(
+    theme_font: ThemeFont,
+    font_script: FontScript,
+    from_font: str,
+    to_font: Optional[str],
+    logfile,
+    text: Optional[str] = None,
+) -> None:
+    if to_font:
+        message = (
+            f'Replace {theme_font.value} {font_script.value} '
+            f'from {from_font} to {to_font}'
+        )
+    else:
+        message = f'Preserve {theme_font.value} {font_script.value} as {from_font}'
+    log(logfile, message, text)
+
+
 def backup_file(path: str) -> str:
     base, ext = os.path.splitext(path)
     backup = f'{base} - backup{ext}'
@@ -75,25 +93,17 @@ def replace_font_element(
     default_font = FONT_MAPPINGS[font_script][theme_font]
     current_font = element.get('typeface')
     if preserve_code_fonts and current_font == PRESERVED_CODE_FONT:
-        message = (
-            f'Preserve {theme_font.value} {font_script.value} '
-            f'as {current_font}'
-        )
-        log(logfile, message, text)
+        log_font_action(theme_font, font_script, current_font, None, logfile, text)
     elif preserve_code_fonts and current_font in REPLACED_CODE_FONTS:
         element.set('typeface', PRESERVED_CODE_FONT)
-        message = (
-            f'Replace {theme_font.value} {font_script.value} '
-            f'from {current_font} to {PRESERVED_CODE_FONT}'
+        log_font_action(
+            theme_font, font_script, current_font, PRESERVED_CODE_FONT, logfile, text
         )
-        log(logfile, message, text)
     elif current_font != default_font:
         element.set('typeface', default_font)
-        message = (
-            f'Replace {theme_font.value} {font_script.value} '
-            f'from {current_font} to {default_font}'
+        log_font_action(
+            theme_font, font_script, current_font, default_font, logfile, text
         )
-        log(logfile, message, text)
 
 
 def replace_properties_fonts(
