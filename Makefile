@@ -6,7 +6,7 @@ ALL_TARGETS := $(shell grep -E -o ^[0-9A-Za-z_-]+: $(MAKEFILE_LIST) | sed 's/://
 .PHONY: $(ALL_TARGETS)
 .DEFAULT_GOAL := help
 
-all: lint update_requirements_dev build_dev mypy test_dev update_requirements build test ## Lint, update requirements.txt, build, and test
+all: lint update_requirements_dev build_dev mypy pytest update_requirements build test ## Lint, update requirements.txt, build, and test
 
 build: ## Build image replace_fonts from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -36,6 +36,10 @@ mypy: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/mypy.sh ghcr.io/shakiyam/replace_fonts_dev --ignore-missing-imports replace_fonts.py
 
+pytest: ## Run pytest
+	@echo -e "\033[36m$@\033[0m"
+	@./replace_fonts_dev pytest -p no:cacheprovider
+
 shellcheck: ## Lint shell scripts
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/shellcheck.sh replace_fonts replace_fonts_dev test/*.sh tools/*.sh
@@ -47,10 +51,6 @@ shfmt: ## Lint shell scripts
 test: ## Test replace_fonts
 	@echo -e "\033[36m$@\033[0m"
 	@./test/run.sh
-
-test_dev: ## Test replace_fonts
-	@echo -e "\033[36m$@\033[0m"
-	@./test/run_dev.sh
 
 update_requirements: ## Update requirements.txt
 	@echo -e "\033[36m$@\033[0m"

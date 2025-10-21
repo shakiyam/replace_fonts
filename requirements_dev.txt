@@ -2,6 +2,8 @@
 #    uv pip compile --strip-extras --output-file requirements_dev.txt requirements_dev.in
 appdirs==1.4.4
     # via ptpython
+iniconfig==2.3.0
+    # via pytest
 jedi==0.19.2
     # via ptpython
 lxml==6.0.2
@@ -10,18 +12,26 @@ mypy==1.18.2
     # via -r requirements_dev.in
 mypy-extensions==1.1.0
     # via mypy
+packaging==25.0
+    # via pytest
 parso==0.8.5
     # via jedi
 pathspec==0.12.1
     # via mypy
 pillow==12.0.0
     # via python-pptx
+pluggy==1.6.0
+    # via pytest
 prompt-toolkit==3.0.52
     # via ptpython
 ptpython==3.0.31
     # via -r requirements_dev.in
 pygments==2.19.2
-    # via ptpython
+    # via
+    #   ptpython
+    #   pytest
+pytest==8.4.2
+    # via -r requirements_dev.in
 python-pptx==1.0.2
     # via -r requirements_dev.in
 typing-extensions==4.15.0
