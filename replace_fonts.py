@@ -41,6 +41,11 @@ FONT_MAPPINGS = {
     },
 }
 
+FONT_ELEMENT_MAPPINGS = [
+    (qn('a:latin'), FontScript.LATIN),
+    (qn('a:ea'), FontScript.EAST_ASIAN),
+]
+
 PRESERVED_CODE_FONT = 'Consolas'
 REPLACED_CODE_FONTS = ('Courier New',)
 
@@ -120,11 +125,7 @@ def replace_properties_fonts(
     logfile,
     element_text: Optional[str] = None,
 ) -> None:
-    font_elements = [
-        (qn('a:latin'), FontScript.LATIN),
-        (qn('a:ea'), FontScript.EAST_ASIAN),
-    ]
-    for qname, font_script in font_elements:
+    for qname, font_script in FONT_ELEMENT_MAPPINGS:
         element = properties.find(qname)
         if element is not None:
             replace_font_element(
@@ -198,11 +199,7 @@ def replace_table_fonts(
 def replace_chart_fonts(
     shape: GraphicFrame, preserve_code_fonts: bool, logfile
 ) -> None:
-    font_elements = [
-        (qn('a:latin'), FontScript.LATIN),
-        (qn('a:ea'), FontScript.EAST_ASIAN),
-    ]
-    for qname, font_script in font_elements:
+    for qname, font_script in FONT_ELEMENT_MAPPINGS:
         for element in shape.chart.element.findall(f'.//{qname}'):
             replace_font_element(
                 element, ThemeFont.MINOR, font_script, preserve_code_fonts, logfile
