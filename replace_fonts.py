@@ -80,10 +80,10 @@ def log_font_action(
 def create_backup(path: str) -> str:
     base, ext = os.path.splitext(path)
     backup_path = f'{base} - backup{ext}'
-    num = 2
+    backup_number = 2
     while os.path.exists(backup_path):
-        backup_path = f'{base} - backup ({num}){ext}'
-        num += 1
+        backup_path = f'{base} - backup ({backup_number}){ext}'
+        backup_number += 1
     shutil.copyfile(path, backup_path)
     return backup_path
 
