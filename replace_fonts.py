@@ -18,7 +18,7 @@ from pptx.shapes.group import GroupShape
 from pptx.slide import SlideMasters, Slides
 from pptx.text.text import TextFrame
 
-__version__ = '2025-10-17'
+__version__ = '2025-10-22'
 
 
 class ThemeFont(Enum):
@@ -287,7 +287,7 @@ def process_pptx_file(pptx_path: str, preserve_code_fonts: bool) -> None:
         log(log_file, f'{pptx_path} was saved.')
 
 
-def main() -> None:
+def main() -> int:
     print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
 
     parser = argparse.ArgumentParser(
@@ -300,11 +300,35 @@ def main() -> None:
     args = parser.parse_args()
     preserve_code_fonts = args.code
 
-    for pptx_path in args.files:
-        process_pptx_file(pptx_path, preserve_code_fonts)
+    if not args.files:
+        print('No files specified.')
+        return 0
 
-    print('All files were processed.')
+    success_count = 0
+    failure_count = 0
+
+    for pptx_path in args.files:
+        try:
+            process_pptx_file(pptx_path, preserve_code_fonts)
+            success_count += 1
+        except FileNotFoundError:
+            print(f'Error: File not found: {pptx_path}')
+            failure_count += 1
+        except Exception as e:
+            print(f'Error processing {pptx_path}: {e}')
+            failure_count += 1
+
+    total = success_count + failure_count
+    if failure_count > 0:
+        print(
+            f'Processing complete: {success_count} succeeded, '
+            f'{failure_count} failed out of {total}.'
+        )
+    else:
+        print(f'All {total} file(s) processed successfully.')
+
+    return 1 if failure_count > 0 else 0
 
 
 if __name__ == '__main__':
-    main()
+    exit(main())

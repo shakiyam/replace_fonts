@@ -6,7 +6,7 @@ from typing import Generator
 
 import pytest
 
-from replace_fonts import process_pptx_file
+from replace_fonts import main, process_pptx_file
 
 
 def normalize_log(log_content: str) -> str:
@@ -30,7 +30,7 @@ def normalize_log(log_content: str) -> str:
 
 
 @pytest.fixture
-def test_workspace(
+def workspace(
     request: pytest.FixtureRequest,
 ) -> Generator[tuple[Path, Path], None, None]:
     """Create temporary workspace for test execution."""
@@ -52,10 +52,10 @@ def test_workspace(
 
 
 def test_sample_files_with_code_option(
-    test_workspace: tuple[Path, Path]
+    workspace: tuple[Path, Path]
 ) -> None:
     """Test all sample files with --code option and verify log output."""
-    work_dir, expected_dir = test_workspace
+    work_dir, expected_dir = workspace
 
     for original in sorted(work_dir.glob('sample*.pptx')):
         name = original.stem
@@ -72,3 +72,57 @@ def test_sample_files_with_code_option(
             expected = normalize_log(expected_log_file.read())
 
         assert actual == expected, f'{name}.log does not match expected output'
+
+
+def test_nonexistent_pptx() -> None:
+    """Test that processing a non-existent PPTX file raises appropriate error."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        nonexistent_pptx = str(Path(tmpdir) / 'does_not_exist.pptx')
+
+        with pytest.raises(FileNotFoundError):
+            process_pptx_file(nonexistent_pptx, preserve_code_fonts=True)
+
+
+def test_invalid_pptx() -> None:
+    """Test that processing an invalid PPTX file raises appropriate error."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        invalid_pptx = Path(tmpdir) / 'invalid.pptx'
+        invalid_pptx.write_text('This is not a valid PPTX file')
+
+        with pytest.raises(Exception):
+            process_pptx_file(str(invalid_pptx), preserve_code_fonts=True)
+
+
+def test_continue_on_error_with_multiple_files(
+    workspace: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test that processing continues when one file fails among multiple files."""
+    work_dir, _ = workspace
+
+    valid_pptx = work_dir / 'sample1.pptx'
+    nonexistent_pptx = work_dir / 'does_not_exist.pptx'
+    another_valid_pptx = work_dir / 'sample2.pptx'
+
+    args = [
+        'replace_fonts.py',
+        str(valid_pptx),
+        str(nonexistent_pptx),
+        str(another_valid_pptx),
+    ]
+    monkeypatch.setattr('sys.argv', args)
+
+    exit_code = main()
+
+    assert exit_code != 0, 'Should return non-zero exit code when errors occur'
+    assert (work_dir / 'sample1.log').exists(), 'First file should be processed'
+    assert (work_dir / 'sample2.log').exists(), 'Third file should be processed'
+
+
+def test_no_files_specified(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that the program handles no files gracefully."""
+    args = ['replace_fonts.py']
+    monkeypatch.setattr('sys.argv', args)
+
+    exit_code = main()
+
+    assert exit_code == 0, 'Should return zero when no files specified'
