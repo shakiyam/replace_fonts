@@ -290,8 +290,12 @@ def process_pptx_file(pptx_path: str, preserve_code_fonts: bool) -> None:
 def main() -> None:
     print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('files', nargs='*')
+    parser = argparse.ArgumentParser(
+        description='Replace fonts in PowerPoint presentations'
+    )
+    parser.add_argument(
+        'files', nargs='*', metavar='FILE', help='PowerPoint (.pptx) files to process'
+    )
     parser.add_argument('--code', help='preserve code fonts', action='store_true')
     args = parser.parse_args()
     preserve_code_fonts = args.code
