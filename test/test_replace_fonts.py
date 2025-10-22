@@ -2,6 +2,7 @@ import re
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Generator
 
 import pytest
 
@@ -29,7 +30,9 @@ def normalize_log(log_content: str) -> str:
 
 
 @pytest.fixture
-def test_workspace(request):
+def test_workspace(
+    request: pytest.FixtureRequest,
+) -> Generator[tuple[Path, Path], None, None]:
     """Create temporary workspace for test execution."""
     test_dir = Path(__file__).parent
 
@@ -48,7 +51,9 @@ def test_workspace(request):
                 shutil.copy(f, failure_dir / f.name)
 
 
-def test_sample_files_with_code_option(test_workspace):
+def test_sample_files_with_code_option(
+    test_workspace: tuple[Path, Path]
+) -> None:
     """Test all sample files with --code option and verify log output."""
     work_dir, expected_dir = test_workspace
 

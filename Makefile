@@ -34,7 +34,7 @@ lint: flake8 hadolint shellcheck shfmt ## Lint for all dependencies
 
 mypy: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/mypy.sh ghcr.io/shakiyam/replace_fonts_dev --ignore-missing-imports replace_fonts.py
+	@./tools/mypy.sh ghcr.io/shakiyam/replace_fonts_dev --ignore-missing-imports replace_fonts.py test/*.py
 
 pytest: ## Run pytest
 	@echo -e "\033[36m$@\033[0m"
