@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from replace_fonts import process_file
+from replace_fonts import process_pptx_file
 
 
 def normalize_log(log_content: str) -> str:
@@ -54,16 +54,16 @@ def test_sample_files_with_code_option(test_workspace):
 
     for original in sorted(work_dir.glob('sample*.pptx')):
         name = original.stem
-        test_file = str(work_dir / f'{name}.pptx')
-        log_file = work_dir / f'{name}.log'
-        expected_log = expected_dir / f'{name}.log'
+        test_pptx_path = str(work_dir / f'{name}.pptx')
+        log_path = work_dir / f'{name}.log'
+        expected_log_path = expected_dir / f'{name}.log'
 
-        process_file(test_file, preserve_code_fonts=True)
+        process_pptx_file(test_pptx_path, preserve_code_fonts=True)
 
-        with open(log_file) as f:
-            actual = normalize_log(f.read())
+        with open(log_path) as actual_log_file:
+            actual = normalize_log(actual_log_file.read())
 
-        with open(expected_log) as f:
-            expected = normalize_log(f.read())
+        with open(expected_log_path) as expected_log_file:
+            expected = normalize_log(expected_log_file.read())
 
         assert actual == expected, f'{name}.log does not match expected output'
