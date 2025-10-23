@@ -66,15 +66,18 @@ The project uses `uv` to manage dependencies. Edit `*.in` files to add/remove de
   - pytest-based unit tests in `test/test_replace_fonts.py`
   - Integration tests in `test/run.sh` using sample files
   - Log verification to ensure correct font replacements
+- **Logging Behavior**: Log files use append mode (`'a'`) by design to preserve historical records when the same file is processed multiple times
+- **Error Handling**: `FileNotFoundError` and `PackageNotFoundError` are intentionally handled together with the same error message, as `PackageNotFoundError` can also be raised when a file does not exist (not just for invalid PPTX files)
 
 ## Development Workflow
 
 1. The project uses containerized tools for consistency - most development tools (flake8, mypy, shellcheck, etc.) run inside Docker containers
-2. All shell scripts and tools follow strict error handling (`set -Eeu -o pipefail`)
-3. Type hints are used throughout the codebase for type safety
-4. Before implementing changes, run tests first to understand current behavior
-5. Make changes incrementally in small, verifiable steps
-6. Run tests after changes to verify behavior
+2. When running Python code for testing or verification, always use `./replace_fonts_dev python3` instead of the host's `python3` to ensure correct dependencies and environment
+3. All shell scripts and tools follow strict error handling (`set -Eeu -o pipefail`)
+4. Type hints are used throughout the codebase for type safety
+5. Before implementing changes, run tests first to understand current behavior
+6. Make changes incrementally in small, verifiable steps
+7. Run tests after changes to verify behavior
 
 ## File Structure
 
