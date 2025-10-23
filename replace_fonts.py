@@ -9,7 +9,7 @@ from lxml.etree import _Element
 
 from pptx import Presentation
 from pptx.exc import PackageNotFoundError
-from pptx.oxml import CT_TextCharacterProperties
+from pptx.oxml import CT_TextCharacterProperties  # type: ignore[attr-defined]
 from pptx.oxml.ns import qn
 from pptx.presentation import Presentation as PresentationType
 from pptx.shapes.autoshape import Shape
