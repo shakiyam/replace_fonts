@@ -51,19 +51,25 @@ def workspace(
                 shutil.copy(f, failure_dir / f.name)
 
 
-def test_sample_files_with_code_option(
-    workspace: tuple[Path, Path]
+@pytest.mark.parametrize('preserve_code_fonts,log_suffix', [
+    (True, ''),
+    (False, '_nocode'),
+])
+def test_sample_pptx(
+    workspace: tuple[Path, Path],
+    preserve_code_fonts: bool,
+    log_suffix: str,
 ) -> None:
-    """Test all sample files with --code option and verify log output."""
+    """Test all sample files and verify log output."""
     work_dir, expected_dir = workspace
 
     for original in sorted(work_dir.glob('sample*.pptx')):
         name = original.stem
         test_pptx_path = str(work_dir / f'{name}.pptx')
         log_path = work_dir / f'{name}.log'
-        expected_log_path = expected_dir / f'{name}.log'
+        expected_log_path = expected_dir / f'{name}{log_suffix}.log'
 
-        process_pptx_file(test_pptx_path, preserve_code_fonts=True)
+        process_pptx_file(test_pptx_path, preserve_code_fonts)
 
         with open(log_path) as actual_log_file:
             actual = normalize_log(actual_log_file.read())
@@ -71,7 +77,9 @@ def test_sample_files_with_code_option(
         with open(expected_log_path) as expected_log_file:
             expected = normalize_log(expected_log_file.read())
 
-        assert actual == expected, f'{name}.log does not match expected output'
+        assert actual == expected, (
+            f'{name}{log_suffix}.log does not match expected output'
+        )
 
 
 def test_nonexistent_pptx() -> None:
