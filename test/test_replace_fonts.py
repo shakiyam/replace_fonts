@@ -85,7 +85,7 @@ def test_sample_pptx(
 def test_nonexistent_pptx() -> None:
     """Test that processing a non-existent PPTX file raises appropriate error."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        nonexistent_pptx = str(Path(tmpdir) / 'does_not_exist.pptx')
+        nonexistent_pptx = str(Path(tmpdir) / 'nonexistent.pptx')
 
         with pytest.raises(FileNotFoundError):
             process_pptx_file(nonexistent_pptx, preserve_code_fonts=True)
@@ -101,14 +101,14 @@ def test_invalid_pptx() -> None:
             process_pptx_file(str(invalid_pptx), preserve_code_fonts=True)
 
 
-def test_continue_on_error_with_multiple_files(
+def test_multiple_pptx_with_error(
     workspace: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test that processing continues when one file fails among multiple files."""
     work_dir, _ = workspace
 
     valid_pptx = work_dir / 'sample1.pptx'
-    nonexistent_pptx = work_dir / 'does_not_exist.pptx'
+    nonexistent_pptx = work_dir / 'nonexistent.pptx'
     another_valid_pptx = work_dir / 'sample2.pptx'
 
     args = [
