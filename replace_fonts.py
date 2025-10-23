@@ -242,6 +242,8 @@ def process_slide_masters(
     for i, slide_master in enumerate(slide_masters):
         log(log_file, f'--- Slide Master {i + 1} ---')
         text_styles = slide_master.element.find(qn('p:txStyles'))
+        if text_styles is None:
+            continue
         for text_style in text_styles:
             if text_style.tag == qn('p:titleStyle'):
                 theme_font = ThemeFont.MAJOR
@@ -256,8 +258,11 @@ def process_slide_masters(
                         log_file,
                     )
                 else:
+                    def_rpr = list_style.find(qn('a:defRPr'))
+                    if def_rpr is None:
+                        continue
                     replace_properties_fonts(
-                        list_style.find(qn('a:defRPr')),
+                        def_rpr,
                         theme_font,
                         preserve_code_fonts,
                         log_file,
