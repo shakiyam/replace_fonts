@@ -8,6 +8,7 @@ from typing import Optional, TextIO
 from lxml.etree import _Element
 
 from pptx import Presentation
+from pptx.exc import PackageNotFoundError
 from pptx.oxml import CT_TextCharacterProperties
 from pptx.oxml.ns import qn
 from pptx.presentation import Presentation as PresentationType
@@ -316,11 +317,11 @@ def main() -> int:
         try:
             process_pptx_file(pptx_path, preserve_code_fonts)
             success_count += 1
-        except FileNotFoundError:
-            print(f'Error: File not found: {pptx_path}')
+        except (FileNotFoundError, PackageNotFoundError):
+            print(f'Error: File not found or invalid: {pptx_path}')
             failure_count += 1
         except Exception as e:
-            print(f'Error processing {pptx_path}: {e}')
+            print(f'Error processing {pptx_path}: {type(e).__name__}: {e}')
             failure_count += 1
 
     total = success_count + failure_count
