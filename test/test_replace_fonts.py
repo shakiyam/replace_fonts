@@ -5,6 +5,7 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+from pptx.exc import PackageNotFoundError
 
 from replace_fonts import main, process_pptx_file
 
@@ -51,7 +52,7 @@ def workspace(
                 shutil.copy(f, failure_dir / f.name)
 
 
-@pytest.mark.parametrize("preserve_code_fonts,log_suffix", [
+@pytest.mark.parametrize(("preserve_code_fonts", "log_suffix"), [
     (True, ""),
     (False, "_nocode"),
 ])
@@ -97,7 +98,7 @@ def test_invalid_pptx() -> None:
         invalid_pptx = Path(tmpdir) / "invalid.pptx"
         invalid_pptx.write_text("This is not a valid PPTX file")
 
-        with pytest.raises(Exception):
+        with pytest.raises(PackageNotFoundError):
             process_pptx_file(str(invalid_pptx), preserve_code_fonts=True)
 
 
