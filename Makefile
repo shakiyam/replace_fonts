@@ -30,7 +30,8 @@ lint: ruff hadolint shellcheck shfmt ## Lint for all dependencies
 
 mypy: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/mypy.sh ghcr.io/shakiyam/replace_fonts_dev --strict --ignore-missing-imports replace_fonts.py test/*.py
+	@[[ -d .mypy_cache ]] || mkdir .mypy_cache
+	@./replace_fonts_dev mypy --strict --ignore-missing-imports *.py test/*.py
 
 pytest: ## Run pytest
 	@echo -e "\033[36m$@\033[0m"
