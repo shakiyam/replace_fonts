@@ -3,10 +3,9 @@ import os.path
 import shutil
 from datetime import datetime
 from enum import Enum
-from typing import Optional, TextIO
+from typing import TextIO
 
 from lxml.etree import _Element
-
 from pptx import Presentation
 from pptx.exc import PackageNotFoundError
 from pptx.oxml import CT_TextCharacterProperties  # type: ignore[attr-defined]
@@ -19,71 +18,71 @@ from pptx.shapes.group import GroupShape
 from pptx.slide import SlideMasters, Slides
 from pptx.text.text import TextFrame
 
-__version__ = '2025-10-22'
+__version__ = "2025-10-24"
 
 
 class ThemeFont(Enum):
-    MAJOR = 'major'
-    MINOR = 'minor'
+    MAJOR = "major"
+    MINOR = "minor"
 
 
 class FontScript(Enum):
-    LATIN = 'latin'
-    EAST_ASIAN = 'east asian'
+    LATIN = "latin"
+    EAST_ASIAN = "east asian"
 
 
 FONT_MAPPINGS = {
     FontScript.LATIN: {
-        ThemeFont.MAJOR: '+mj-lt',
-        ThemeFont.MINOR: '+mn-lt',
+        ThemeFont.MAJOR: "+mj-lt",
+        ThemeFont.MINOR: "+mn-lt",
     },
     FontScript.EAST_ASIAN: {
-        ThemeFont.MAJOR: '+mj-ea',
-        ThemeFont.MINOR: '+mn-ea',
+        ThemeFont.MAJOR: "+mj-ea",
+        ThemeFont.MINOR: "+mn-ea",
     },
 }
 
 FONT_ELEMENT_MAPPINGS = [
-    (qn('a:latin'), FontScript.LATIN),
-    (qn('a:ea'), FontScript.EAST_ASIAN),
+    (qn("a:latin"), FontScript.LATIN),
+    (qn("a:ea"), FontScript.EAST_ASIAN),
 ]
 
-PRESERVED_CODE_FONT = 'Consolas'
-REPLACED_CODE_FONTS = ('Courier New',)
+PRESERVED_CODE_FONT = "Consolas"
+REPLACED_CODE_FONTS = ("Courier New",)
 
 
-def log(log_file: TextIO, message: str, element_text: Optional[str] = None) -> None:
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def log(log_file: TextIO, message: str, element_text: str | None = None) -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if element_text is not None:
-        message = f'[{element_text}] {message}'
-    print(f'{timestamp} {message}', file=log_file)
-    print(f'{timestamp} {message}')
+        message = f"[{element_text}] {message}"
+    print(f"{timestamp} {message}", file=log_file)
+    print(f"{timestamp} {message}")
 
 
 def log_font_action(
     theme_font: ThemeFont,
     font_script: FontScript,
     current_font: str,
-    new_font: Optional[str],
+    new_font: str | None,
     log_file: TextIO,
-    element_text: Optional[str] = None,
+    element_text: str | None = None,
 ) -> None:
     if new_font:
         message = (
-            f'Replace {theme_font.value} {font_script.value} '
-            f'from {current_font} to {new_font}'
+            f"Replace {theme_font.value} {font_script.value} "
+            f"from {current_font} to {new_font}"
         )
     else:
-        message = f'Preserve {theme_font.value} {font_script.value} as {current_font}'
+        message = f"Preserve {theme_font.value} {font_script.value} as {current_font}"
     log(log_file, message, element_text)
 
 
 def create_backup(path: str) -> str:
     base, ext = os.path.splitext(path)
-    backup_path = f'{base} - backup{ext}'
+    backup_path = f"{base} - backup{ext}"
     backup_number = 2
     while os.path.exists(backup_path):
-        backup_path = f'{base} - backup ({backup_number}){ext}'
+        backup_path = f"{base} - backup ({backup_number}){ext}"
         backup_number += 1
     shutil.copyfile(path, backup_path)
     return backup_path
@@ -95,16 +94,16 @@ def replace_font_element(
     font_script: FontScript,
     preserve_code_fonts: bool,
     log_file: TextIO,
-    element_text: Optional[str] = None,
+    element_text: str | None = None,
 ) -> None:
     default_font = FONT_MAPPINGS[font_script][theme_font]
-    current_font = element.get('typeface')
+    current_font = element.get("typeface")
     if preserve_code_fonts and current_font == PRESERVED_CODE_FONT:
         log_font_action(
             theme_font, font_script, current_font, None, log_file, element_text
         )
     elif preserve_code_fonts and current_font in REPLACED_CODE_FONTS:
-        element.set('typeface', PRESERVED_CODE_FONT)
+        element.set("typeface", PRESERVED_CODE_FONT)
         log_font_action(
             theme_font,
             font_script,
@@ -114,7 +113,7 @@ def replace_font_element(
             element_text,
         )
     elif current_font != default_font:
-        element.set('typeface', default_font)
+        element.set("typeface", default_font)
         log_font_action(
             theme_font, font_script, current_font, default_font, log_file, element_text
         )
@@ -125,7 +124,7 @@ def replace_properties_fonts(
     theme_font: ThemeFont,
     preserve_code_fonts: bool,
     log_file: TextIO,
-    element_text: Optional[str] = None,
+    element_text: str | None = None,
 ) -> None:
     for qname, font_script in FONT_ELEMENT_MAPPINGS:
         element = properties.find(qname)
@@ -179,7 +178,7 @@ def replace_shape_text_fonts(
     shape: Shape, preserve_code_fonts: bool, log_file: TextIO
 ) -> None:
     placeholder = shape.element.find(f".//{qn('p:ph')}")
-    if placeholder is not None and placeholder.get('type') in ['ctrTitle', 'title']:
+    if placeholder is not None and placeholder.get("type") in ["ctrTitle", "title"]:
         theme_font = ThemeFont.MAJOR
     else:
         theme_font = ThemeFont.MINOR
@@ -202,7 +201,7 @@ def replace_chart_fonts(
     shape: GraphicFrame, preserve_code_fonts: bool, log_file: TextIO
 ) -> None:
     for qname, font_script in FONT_ELEMENT_MAPPINGS:
-        for element in shape.chart.element.findall(f'.//{qname}'):
+        for element in shape.chart.element.findall(f".//{qname}"):
             replace_font_element(
                 element, ThemeFont.MINOR, font_script, preserve_code_fonts, log_file
             )
@@ -228,11 +227,9 @@ def replace_shape_fonts(
         replace_group_fonts(shape, preserve_code_fonts, log_file)
 
 
-def process_slides(
-    slides: Slides, preserve_code_fonts: bool, log_file: TextIO
-) -> None:
+def process_slides(slides: Slides, preserve_code_fonts: bool, log_file: TextIO) -> None:
     for i, slide in enumerate(slides):
-        log(log_file, f'--- Slide {i + 1} ---')
+        log(log_file, f"--- Slide {i + 1} ---")
         for shape in slide.shapes:
             replace_shape_fonts(shape, preserve_code_fonts, log_file)
 
@@ -241,12 +238,12 @@ def process_slide_masters(
     slide_masters: SlideMasters, preserve_code_fonts: bool, log_file: TextIO
 ) -> None:
     for i, slide_master in enumerate(slide_masters):
-        log(log_file, f'--- Slide Master {i + 1} ---')
-        text_styles = slide_master.element.find(qn('p:txStyles'))
+        log(log_file, f"--- Slide Master {i + 1} ---")
+        text_styles = slide_master.element.find(qn("p:txStyles"))
         if text_styles is None:
             continue
         for text_style in text_styles:
-            if text_style.tag == qn('p:titleStyle'):
+            if text_style.tag == qn("p:titleStyle"):
                 theme_font = ThemeFont.MAJOR
             else:
                 theme_font = ThemeFont.MINOR
@@ -259,7 +256,7 @@ def process_slide_masters(
                         log_file,
                     )
                 else:
-                    def_rpr = list_style.find(qn('a:defRPr'))
+                    def_rpr = list_style.find(qn("a:defRPr"))
                     if def_rpr is None:
                         continue
                     replace_properties_fonts(
@@ -279,35 +276,35 @@ def process_presentation(
 
 def process_pptx_file(pptx_path: str, preserve_code_fonts: bool) -> None:
     base, _ = os.path.splitext(pptx_path)
-    log_path = f'{base}.log'
-    with open(log_path, 'a') as log_file:
+    log_path = f"{base}.log"
+    with open(log_path, "a") as log_file:
         backup_path = create_backup(pptx_path)
-        log(log_file, f'{pptx_path} was backed up to {backup_path}.')
+        log(log_file, f"{pptx_path} was backed up to {backup_path}.")
 
         presentation = Presentation(pptx_path)
-        log(log_file, f'{pptx_path} was opened.')
+        log(log_file, f"{pptx_path} was opened.")
 
         process_presentation(presentation, preserve_code_fonts, log_file)
 
         presentation.save(pptx_path)
-        log(log_file, f'{pptx_path} was saved.')
+        log(log_file, f"{pptx_path} was saved.")
 
 
 def main() -> int:
-    print(f'replace_fonts - version {__version__} by Shinichi Akiyama')
+    print(f"replace_fonts - version {__version__} by Shinichi Akiyama")
 
     parser = argparse.ArgumentParser(
-        description='Replace fonts in PowerPoint presentations'
+        description="Replace fonts in PowerPoint presentations"
     )
     parser.add_argument(
-        'files', nargs='*', metavar='FILE', help='PowerPoint (.pptx) files to process'
+        "files", nargs="*", metavar="FILE", help="PowerPoint (.pptx) files to process"
     )
-    parser.add_argument('--code', help='preserve code fonts', action='store_true')
+    parser.add_argument("--code", help="preserve code fonts", action="store_true")
     args = parser.parse_args()
     preserve_code_fonts = args.code
 
     if not args.files:
-        print('No files specified.')
+        print("No files specified.")
         return 0
 
     success_count = 0
@@ -318,23 +315,23 @@ def main() -> int:
             process_pptx_file(pptx_path, preserve_code_fonts)
             success_count += 1
         except (FileNotFoundError, PackageNotFoundError):
-            print(f'Error: File not found or invalid: {pptx_path}')
+            print(f"Error: File not found or invalid: {pptx_path}")
             failure_count += 1
         except Exception as e:
-            print(f'Error processing {pptx_path}: {type(e).__name__}: {e}')
+            print(f"Error processing {pptx_path}: {type(e).__name__}: {e}")
             failure_count += 1
 
     total = success_count + failure_count
     if failure_count > 0:
         print(
-            f'Processing complete: {success_count} succeeded, '
-            f'{failure_count} failed out of {total}.'
+            f"Processing complete: {success_count} succeeded, "
+            f"{failure_count} failed out of {total}."
         )
     else:
-        print(f'All {total} file(s) processed successfully.')
+        print(f"All {total} file(s) processed successfully.")
 
     return 1 if failure_count > 0 else 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())

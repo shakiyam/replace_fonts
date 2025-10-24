@@ -28,11 +28,11 @@ make test
 make lint
 
 # Individual linters:
-make flake8    # Python linting
-make mypy      # Python type checking
+make ruff      # Python linting
+make hadolint  # Dockerfile linting
 make shellcheck # Shell script linting
 make shfmt     # Shell script formatting
-make hadolint  # Dockerfile linting
+make mypy      # Python type checking
 ```
 
 ### Building Docker Images
@@ -71,7 +71,7 @@ The project uses `uv` to manage dependencies. Edit `*.in` files to add/remove de
 
 ## Development Workflow
 
-1. The project uses containerized tools for consistency - most development tools (flake8, mypy, shellcheck, etc.) run inside Docker containers
+1. The project uses containerized tools for consistency - most development tools (ruff, hadolint, shellcheck, etc.) run inside Docker containers
 2. When running Python code for testing or verification, always use `./replace_fonts_dev python3` instead of the host's `python3` to ensure correct dependencies and environment
 3. All shell scripts and tools follow strict error handling (`set -Eeu -o pipefail`)
 4. Type hints are used throughout the codebase for type safety
@@ -81,7 +81,7 @@ The project uses `uv` to manage dependencies. Edit `*.in` files to add/remove de
 
 ## File Structure
 
-- **`tools/`**: Containerized development tool wrappers (flake8, mypy, shellcheck, shfmt, hadolint, uv)
+- **`tools/`**: Containerized development tool wrappers (hadolint, mypy, ruff, shellcheck, shfmt, uv)
 - **`test/`**: Test suite with sample PPTX files, test scripts, and expected log outputs
   - `test/original/`: Sample PPTX files for testing
   - `test/expected/`: Expected log outputs for verification

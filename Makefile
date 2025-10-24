@@ -16,10 +16,6 @@ build_dev: ## Build image replace_fonts_dev from Dockerfile_dev
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/build.sh ghcr.io/shakiyam/replace_fonts_dev Dockerfile_dev
 
-flake8: ## Lint Python code
-	@echo -e "\033[36m$@\033[0m"
-	@./tools/flake8.sh --max-line-length=88
-
 hadolint: ## Lint Dockerfile
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/hadolint.sh Dockerfile Dockerfile_dev
@@ -30,7 +26,7 @@ help: ## Print this help
 	@echo 'Targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9A-Za-z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-lint: flake8 hadolint shellcheck shfmt ## Lint for all dependencies
+lint: ruff hadolint shellcheck shfmt ## Lint for all dependencies
 
 mypy: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
@@ -39,6 +35,10 @@ mypy: ## Lint Python code
 pytest: ## Run pytest
 	@echo -e "\033[36m$@\033[0m"
 	@./replace_fonts_dev pytest -p no:cacheprovider
+
+ruff: ## Lint Python code
+	@echo -e "\033[36m$@\033[0m"
+	@./tools/ruff.sh check
 
 shellcheck: ## Lint shell scripts
 	@echo -e "\033[36m$@\033[0m"

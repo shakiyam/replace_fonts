@@ -1,4 +1,5 @@
 .mypy_cache
+.ruff_cache
 test/sample*.log
 test/sample*.pptx
 test/failures/
