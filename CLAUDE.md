@@ -81,7 +81,8 @@ The project uses `uv` to manage dependencies. Edit `*.in` files to add/remove de
 
 ## File Structure
 
-- **`tools/`**: Containerized development tool wrappers (hadolint, mypy, ruff, shellcheck, shfmt, uv)
+- **`tools/`**: Containerized development tool wrappers (hadolint, ruff, shellcheck, shfmt, uv) - project-independent tools using standalone Docker images
+- **`replace_fonts_dev`**: Wrapper script for project-dependent tools (mypy, pytest) using the replace_fonts_dev Docker image
 - **`test/`**: Test suite with sample PPTX files, test scripts, and expected log outputs
   - `test/original/`: Sample PPTX files for testing
   - `test/expected/`: Expected log outputs for verification
