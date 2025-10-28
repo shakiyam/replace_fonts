@@ -1,3 +1,17 @@
+[project]
+name = "replace-fonts"
+version = "0.0.0"  # Formal value only; actual version managed in __version__
+dependencies = [
+    "python-pptx",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "pytest",
+    "ptpython",
+]
+
 [tool.ruff]
 target-version = "py314"
 

@@ -55,8 +55,8 @@ test: ## Test replace_fonts
 
 update_requirements: ## Update requirements.txt
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/uv.sh pip compile --upgrade --strip-extras --output-file requirements.txt requirements.in
+	@./tools/uv.sh pip compile --upgrade --strip-extras --output-file requirements.txt pyproject.toml
 
 update_requirements_dev: ## Update requirements_dev.txt
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/uv.sh pip compile --upgrade --strip-extras --output-file requirements_dev.txt requirements_dev.in
+	@./tools/uv.sh pip compile --upgrade --strip-extras --extra dev --output-file requirements_dev.txt pyproject.toml
