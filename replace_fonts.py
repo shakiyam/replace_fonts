@@ -1,8 +1,9 @@
 import argparse
-import os.path
 import shutil
+import zipfile
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import TextIO
 
 from lxml.etree import _Element
@@ -77,12 +78,11 @@ def log_font_action(
     log(log_file, message, element_text)
 
 
-def create_backup(path: str) -> str:
-    base, ext = os.path.splitext(path)
-    backup_path = f"{base} - backup{ext}"
+def create_backup(path: Path) -> Path:
+    backup_path = path.with_stem(f"{path.stem} - backup")
     backup_number = 2
-    while os.path.exists(backup_path):
-        backup_path = f"{base} - backup ({backup_number}){ext}"
+    while backup_path.exists():
+        backup_path = path.with_stem(f"{path.stem} - backup ({backup_number})")
         backup_number += 1
     shutil.copyfile(path, backup_path)
     return backup_path
@@ -274,19 +274,18 @@ def process_presentation(
     process_slide_masters(presentation.slide_masters, preserve_code_fonts, log_file)
 
 
-def process_pptx_file(pptx_path: str, preserve_code_fonts: bool) -> None:
-    base, _ = os.path.splitext(pptx_path)
-    log_path = f"{base}.log"
+def process_pptx_file(pptx_path: Path, preserve_code_fonts: bool) -> None:
+    log_path = pptx_path.with_suffix(".log")
     with open(log_path, "a") as log_file:
         backup_path = create_backup(pptx_path)
         log(log_file, f"{pptx_path} was backed up to {backup_path}.")
 
-        presentation = Presentation(pptx_path)
+        presentation = Presentation(str(pptx_path))
         log(log_file, f"{pptx_path} was opened.")
 
         process_presentation(presentation, preserve_code_fonts, log_file)
 
-        presentation.save(pptx_path)
+        presentation.save(str(pptx_path))
         log(log_file, f"{pptx_path} was saved.")
 
 
@@ -310,12 +309,16 @@ def main() -> int:
     success_count = 0
     failure_count = 0
 
-    for pptx_path in args.files:
+    for pptx_path_str in args.files:
+        pptx_path = Path(pptx_path_str)
         try:
             process_pptx_file(pptx_path, preserve_code_fonts)
             success_count += 1
-        except (FileNotFoundError, PackageNotFoundError):
-            print(f"Error: File not found or invalid: {pptx_path}")
+        except FileNotFoundError:
+            print(f"Error: File not found: {pptx_path}")
+            failure_count += 1
+        except (PackageNotFoundError, zipfile.BadZipFile, KeyError):
+            print(f"Error: Invalid PowerPoint file: {pptx_path}")
             failure_count += 1
         except Exception as e:
             print(f"Error processing {pptx_path}: {type(e).__name__}: {e}")

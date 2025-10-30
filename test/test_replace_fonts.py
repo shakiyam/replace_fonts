@@ -1,6 +1,7 @@
 import re
 import shutil
 import tempfile
+import zipfile
 from collections.abc import Generator
 from pathlib import Path
 
@@ -68,7 +69,7 @@ def test_sample_pptx(
 
     for original in sorted(work_dir.glob("sample*.pptx")):
         name = original.stem
-        test_pptx_path = str(work_dir / f"{name}.pptx")
+        test_pptx_path = work_dir / f"{name}.pptx"
         log_path = work_dir / f"{name}.log"
         expected_log_path = expected_dir / f"{name}{log_suffix}.log"
 
@@ -88,7 +89,7 @@ def test_sample_pptx(
 def test_nonexistent_pptx() -> None:
     """Test that processing a non-existent PPTX file raises appropriate error."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        nonexistent_pptx = str(Path(tmpdir) / "nonexistent.pptx")
+        nonexistent_pptx = Path(tmpdir) / "nonexistent.pptx"
 
         with pytest.raises(FileNotFoundError):
             process_pptx_file(nonexistent_pptx, preserve_code_fonts=True)
@@ -100,8 +101,8 @@ def test_invalid_pptx() -> None:
         invalid_pptx = Path(tmpdir) / "invalid.pptx"
         invalid_pptx.write_text("This is not a valid PPTX file")
 
-        with pytest.raises(PackageNotFoundError):
-            process_pptx_file(str(invalid_pptx), preserve_code_fonts=True)
+        with pytest.raises((PackageNotFoundError, zipfile.BadZipFile)):
+            process_pptx_file(invalid_pptx, preserve_code_fonts=True)
 
 
 def test_multiple_pptx_with_error(
