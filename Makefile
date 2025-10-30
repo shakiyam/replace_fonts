@@ -35,7 +35,7 @@ mypy: ## Lint Python code
 
 pytest: ## Run pytest
 	@echo -e "\033[36m$@\033[0m"
-	@./replace_fonts_dev pytest -p no:cacheprovider
+	@./replace_fonts_dev pytest
 
 ruff: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
