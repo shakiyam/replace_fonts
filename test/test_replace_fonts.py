@@ -5,6 +5,7 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+from conftest import phase_report_key
 from pptx.exc import PackageNotFoundError
 
 from replace_fonts import main, process_pptx_file
@@ -45,7 +46,8 @@ def workspace(
 
         yield work_dir, test_dir / "expected"
 
-        if request.node.rep_call.failed:
+        reports = request.node.stash.get(phase_report_key, {})
+        if "call" in reports and reports["call"].failed:
             failure_dir = test_dir / "failures"
             failure_dir.mkdir(exist_ok=True)
             for f in work_dir.glob("*.log"):
