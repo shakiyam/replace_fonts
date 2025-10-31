@@ -26,6 +26,11 @@ help: ## Print this help
 	@echo 'Targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[0-9A-Za-z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+hooks: ## Install git hooks
+	@echo -e "\033[36m$@\033[0m"
+	@ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
+	@echo "Git hooks installed"
+
 lint: ruff hadolint shellcheck shfmt ## Lint for all dependencies
 
 mypy: ## Lint Python code
@@ -43,11 +48,11 @@ ruff: ## Lint Python code
 
 shellcheck: ## Lint shell scripts
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/shellcheck.sh replace_fonts replace_fonts_dev test/*.sh tools/*.sh
+	@./tools/shellcheck.sh replace_fonts replace_fonts_dev test/*.sh tools/*.sh hooks/*
 
 shfmt: ## Lint shell scripts
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/shfmt.sh -l -d -i 2 -ci -bn replace_fonts replace_fonts_dev test/*.sh tools/*.sh
+	@./tools/shfmt.sh -l -d -i 2 -ci -bn replace_fonts replace_fonts_dev test/*.sh tools/*.sh hooks/*
 
 test: ## Test replace_fonts
 	@echo -e "\033[36m$@\033[0m"

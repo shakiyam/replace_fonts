@@ -19,7 +19,7 @@ from pptx.shapes.group import GroupShape
 from pptx.slide import SlideMasters, Slides
 from pptx.text.text import TextFrame
 
-__version__ = "2025-10-24"
+__version__ = "2025-10-31"
 
 
 class ThemeFont(Enum):

@@ -8,6 +8,15 @@ replace_fonts is a Python tool that replaces and unifies fonts in PowerPoint pre
 
 ## Key Commands
 
+### Initial Setup
+
+```bash
+# Install git hooks (run once after cloning)
+make hooks
+```
+
+This installs a pre-commit hook that automatically updates the version number in `replace_fonts.py` to the current date (YYYY-MM-DD format) whenever `replace_fonts.py` is modified and committed.
+
 ### Building and Testing
 
 ```bash
