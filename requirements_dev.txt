@@ -24,7 +24,7 @@ pluggy==1.6.0
     # via pytest
 prompt-toolkit==3.0.52
     # via ptpython
-ptpython==3.0.31
+ptpython==3.0.32
     # via replace-fonts (pyproject.toml)
 pygments==2.19.2
     # via
