@@ -6,7 +6,7 @@ iniconfig==2.3.0
     # via pytest
 jedi==0.19.2
     # via ptpython
-librt==0.7.5
+librt==0.7.7
     # via mypy
 lxml==6.0.2
     # via python-pptx
@@ -20,7 +20,7 @@ parso==0.8.5
     # via jedi
 pathspec==0.12.1
     # via mypy
-pillow==12.0.0
+pillow==12.1.0
     # via python-pptx
 pluggy==1.6.0
     # via pytest
