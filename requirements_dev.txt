@@ -14,7 +14,7 @@ mypy==1.19.1
     # via replace-fonts (pyproject.toml)
 mypy-extensions==1.1.0
     # via mypy
-packaging==25.0
+packaging==26.0
     # via pytest
 parso==0.8.5
     # via jedi
@@ -40,7 +40,7 @@ typing-extensions==4.15.0
     # via
     #   mypy
     #   python-pptx
-wcwidth==0.2.14
+wcwidth==0.3.0
     # via prompt-toolkit
 xlsxwriter==3.2.9
     # via python-pptx
