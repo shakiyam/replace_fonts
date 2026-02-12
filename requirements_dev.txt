@@ -20,7 +20,7 @@ parso==0.8.6
     # via jedi
 pathspec==1.0.4
     # via mypy
-pillow==12.1.0
+pillow==12.1.1
     # via python-pptx
 pluggy==1.6.0
     # via pytest
