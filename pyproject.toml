@@ -48,3 +48,6 @@ select = [
     "S101",  # Use of assert in tests is expected
     "S108",  # Hardcoded temporary file paths in test patterns
 ]
+
+[tool.uv]
+exclude-newer = "3 days"
