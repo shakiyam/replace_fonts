@@ -65,8 +65,6 @@ Option     | Description
   +mn-lt | Body Font Latin (Minor Latin Font)
   +mj-ea | Heading Font East Asian (Major East Asian Font)
   +mn-ea | Body Font East Asian (Minor East Asian Font)
-  +mj-cs | Heading Font Complex Script (Major Complex Script Font)
-  +mn-cs | Body Font Complex Script (Minor Complex Script Font)
 
 Tips
 ----

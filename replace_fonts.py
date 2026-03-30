@@ -30,7 +30,6 @@ class ThemeFont(Enum):
 class FontScript(Enum):
     LATIN = "latin"
     EAST_ASIAN = "east asian"
-    COMPLEX_SCRIPT = "complex script"
 
 
 FONT_MAPPINGS = {
@@ -42,16 +41,11 @@ FONT_MAPPINGS = {
         ThemeFont.MAJOR: "+mj-ea",
         ThemeFont.MINOR: "+mn-ea",
     },
-    FontScript.COMPLEX_SCRIPT: {
-        ThemeFont.MAJOR: "+mj-cs",
-        ThemeFont.MINOR: "+mn-cs",
-    },
 }
 
 FONT_ELEMENT_MAPPINGS = [
     (qn("a:latin"), FontScript.LATIN),
     (qn("a:ea"), FontScript.EAST_ASIAN),
-    (qn("a:cs"), FontScript.COMPLEX_SCRIPT),
 ]
 
 PRESERVED_CODE_FONT = "Consolas"
