@@ -359,7 +359,9 @@ def main() -> int:
     )
     parser.add_argument("--code", help="preserve code fonts", action="store_true")
     parser.add_argument(
-        "--dry-run", help="show changes without modifying files", action="store_true"
+        "--dry-run",
+        help="preview font replacements without modifying files",
+        action="store_true",
     )
     args = parser.parse_args()
     preserve_code_fonts = args.code
