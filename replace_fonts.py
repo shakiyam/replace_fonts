@@ -19,7 +19,7 @@ from pptx.shapes.group import GroupShape
 from pptx.slide import SlideMasters, Slides
 from pptx.text.text import TextFrame
 
-__version__ = "2026-03-19"
+__version__ = "2026-03-30"
 
 
 class ThemeFont(Enum):
@@ -326,19 +326,26 @@ def process_presentation(
     process_notes_master(presentation, preserve_code_fonts, log_file)
 
 
-def process_pptx_file(pptx_path: Path, preserve_code_fonts: bool) -> None:
+def process_pptx_file(
+    pptx_path: Path, preserve_code_fonts: bool, dry_run: bool = False
+) -> None:
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "a") as log_file:
-        backup_path = create_backup(pptx_path)
-        log(log_file, f"{pptx_path} was backed up to {backup_path}.")
+        if not dry_run:
+            backup_path = create_backup(pptx_path)
+            log(log_file, f"{pptx_path} was backed up to {backup_path}.")
 
         presentation = Presentation(str(pptx_path))
-        log(log_file, f"{pptx_path} was opened.")
+        if dry_run:
+            log(log_file, f"{pptx_path} was opened. (dry run)")
+        else:
+            log(log_file, f"{pptx_path} was opened.")
 
         process_presentation(presentation, preserve_code_fonts, log_file)
 
-        presentation.save(str(pptx_path))
-        log(log_file, f"{pptx_path} was saved.")
+        if not dry_run:
+            presentation.save(str(pptx_path))
+            log(log_file, f"{pptx_path} was saved.")
 
 
 def main() -> int:
@@ -351,8 +358,12 @@ def main() -> int:
         "files", nargs="*", metavar="FILE", help="PowerPoint (.pptx) files to process"
     )
     parser.add_argument("--code", help="preserve code fonts", action="store_true")
+    parser.add_argument(
+        "--dry-run", help="show changes without modifying files", action="store_true"
+    )
     args = parser.parse_args()
     preserve_code_fonts = args.code
+    dry_run = args.dry_run
 
     if not args.files:
         print("No files specified.")
@@ -364,7 +375,7 @@ def main() -> int:
     for pptx_path_str in args.files:
         pptx_path = Path(pptx_path_str)
         try:
-            process_pptx_file(pptx_path, preserve_code_fonts)
+            process_pptx_file(pptx_path, preserve_code_fonts, dry_run)
             success_count += 1
         except FileNotFoundError:
             print(f"Error: File not found: {pptx_path}")
