@@ -36,6 +36,10 @@ pytest==9.0.2
     # via replace-fonts (pyproject.toml)
 python-pptx==1.0.2
     # via replace-fonts (pyproject.toml)
+pyyaml==6.0.3
+    # via replace-fonts (pyproject.toml)
+types-pyyaml==6.0.12.20250915
+    # via replace-fonts (pyproject.toml)
 typing-extensions==4.15.0
     # via
     #   mypy

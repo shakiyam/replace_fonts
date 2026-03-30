@@ -1,0 +1,7 @@
+theme_fonts:
+  major:
+    latin: "Arial"
+    ea: "メイリオ"
+  minor:
+    latin: "Arial"
+    ea: "メイリオ"

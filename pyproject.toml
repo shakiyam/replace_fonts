@@ -3,6 +3,7 @@ name = "replace-fonts"
 version = "0.0.0"  # Formal value only; actual version managed in __version__
 dependencies = [
     "python-pptx",
+    "pyyaml",
 ]
 
 [project.optional-dependencies]
@@ -10,6 +11,7 @@ dev = [
     "mypy",
     "pytest",
     "ptpython",
+    "types-pyyaml",
 ]
 
 [tool.mypy]

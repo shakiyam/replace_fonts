@@ -1,12 +1,9 @@
 import re
-import shutil
 import tempfile
 import zipfile
-from collections.abc import Generator
 from pathlib import Path
 
 import pytest
-from conftest import phase_report_key
 from pptx.exc import PackageNotFoundError
 
 from replace_fonts import main, process_pptx_file
@@ -30,29 +27,6 @@ def normalize_log(log_content: str) -> str:
         normalized.append(line)
 
     return "\n".join(normalized)
-
-
-@pytest.fixture
-def workspace(
-    request: pytest.FixtureRequest,
-) -> Generator[tuple[Path, Path]]:
-    """Create temporary workspace for test execution."""
-    test_dir = Path(__file__).parent
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        work_dir = Path(tmpdir)
-
-        for original in sorted((test_dir / "original").glob("sample*.pptx")):
-            shutil.copy(original, work_dir / original.name)
-
-        yield work_dir, test_dir / "expected"
-
-        reports = request.node.stash.get(phase_report_key, {})
-        if "call" in reports and reports["call"].failed:
-            failure_dir = test_dir / "failures"
-            failure_dir.mkdir(exist_ok=True)
-            for f in work_dir.glob("*.log"):
-                shutil.copy(f, failure_dir / f.name)
 
 
 @pytest.mark.parametrize(("preserve_code_fonts", "log_suffix"), [

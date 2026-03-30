@@ -19,6 +19,8 @@ from pptx.shapes.group import GroupShape
 from pptx.slide import SlideMasters, Slides
 from pptx.text.text import TextFrame
 
+from font_policy import load_font_policy, update_theme_fonts
+
 __version__ = "2026-03-30"
 
 
@@ -321,7 +323,10 @@ def process_presentation(
 
 
 def process_pptx_file(
-    pptx_path: Path, preserve_code_fonts: bool, dry_run: bool = False
+    pptx_path: Path,
+    preserve_code_fonts: bool,
+    dry_run: bool = False,
+    font_policy_path: Path | None = None,
 ) -> None:
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "a") as log_file:
@@ -334,6 +339,10 @@ def process_pptx_file(
             log(log_file, f"{pptx_path} was opened. (dry run)")
         else:
             log(log_file, f"{pptx_path} was opened.")
+
+        if font_policy_path is not None:
+            policy = load_font_policy(font_policy_path)
+            update_theme_fonts(presentation, policy, log_file, log)
 
         process_presentation(presentation, preserve_code_fonts, log_file)
 
@@ -357,9 +366,15 @@ def main() -> int:
         help="preview font replacements without modifying files",
         action="store_true",
     )
+    parser.add_argument(
+        "--font-policy",
+        help="YAML file defining font policy for theme fonts",
+        type=Path,
+    )
     args = parser.parse_args()
     preserve_code_fonts = args.code
     dry_run = args.dry_run
+    font_policy_path: Path | None = args.font_policy
 
     if not args.files:
         print("No files specified.")
@@ -371,7 +386,7 @@ def main() -> int:
     for pptx_path_str in args.files:
         pptx_path = Path(pptx_path_str)
         try:
-            process_pptx_file(pptx_path, preserve_code_fonts, dry_run)
+            process_pptx_file(pptx_path, preserve_code_fonts, dry_run, font_policy_path)
             success_count += 1
         except FileNotFoundError:
             print(f"Error: File not found: {pptx_path}")

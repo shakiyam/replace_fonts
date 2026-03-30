@@ -38,22 +38,23 @@ Specify PowerPoint files as arguments.
 Windows:
 
 ```console
-py replace_fonts.py [-h] [--code] [--dry-run] [files ...]
+py replace_fonts.py [-h] [--code] [--dry-run] [--font-policy YAML] [files ...]
 ```
 
 Linux/macOS:
 
 ```console
-python3 replace_fonts.py [-h] [--code] [--dry-run] [files ...]
+python3 replace_fonts.py [-h] [--code] [--dry-run] [--font-policy YAML] [files ...]
 ```
 
 Options:
 
-Option     | Description
------------|---------------------------
--h, --help | show help message and exit
---code     | preserve code fonts
---dry-run  | preview font replacements without modifying files
+Option             | Description
+-------------------|---------------------------
+-h, --help         | show help message and exit
+--code             | preserve code fonts
+--dry-run          | preview font replacements without modifying files
+--font-policy YAML | apply font policy to update theme fonts
 
 * replace_fonts backs up the specified file sequentially, opens it, replaces the fonts, and saves it. (For example, `sample.pptx` is backed up to `sample - backup.pptx`.)
 * The replacement status is not only displayed on the screen, but also logged in a log file with the same name as the PowerPoint file. (Font replacements in `sample.pptx` will be logged in `sample.log`)
