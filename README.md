@@ -16,18 +16,24 @@ replace_fonts solves this problem. replace_fonts fixes the fonts in a PowerPoint
 Requirements
 ------------
 
-replace_fonts requires python-pptx.
+replace_fonts requires python-pptx and PyYAML.
 
 Windows:
 
 ```console
-py -m pip install python-pptx
+py -m pip install python-pptx pyyaml
 ```
 
 Linux/macOS:
 
 ```console
-python3 -m pip install python-pptx
+python3 -m pip install python-pptx pyyaml
+```
+
+Or using uv:
+
+```console
+uv pip install --system python-pptx pyyaml
 ```
 
 Usage
@@ -86,6 +92,13 @@ If you are using Windows, you may find it useful to add a shortcut to SendTo by 
 
 ```console
 py -m pip install pywin32
+py create_sendto_shortcut.py
+```
+
+Or using uv:
+
+```console
+uv pip install --system pywin32
 py create_sendto_shortcut.py
 ```
 
