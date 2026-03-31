@@ -5,14 +5,17 @@ import pytest
 from lxml import etree
 from pptx import Presentation
 
-from define_theme_fonts import FontPolicy, load_font_policy, update_theme_fonts
+from define_theme_fonts import (
+    A_NS,
+    EAST_ASIAN_SCRIPTS,
+    FontPolicy,
+    load_font_policy,
+    update_theme_fonts,
+)
 from logger import Logger
 from replace_fonts import main, process_pptx_file
 
 POLICY_PATH = Path(__file__).parent / "policy.yaml"
-A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
-EAST_ASIAN_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
-
 EXPECTED_POLICY = FontPolicy(
     major_latin="Arial", major_ea="Meiryo",
     minor_latin="Arial", minor_ea="Meiryo",
