@@ -9,7 +9,7 @@ from pptx.presentation import Presentation as PresentationType
 from logger import Logger
 
 A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
-EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
+EAST_ASIAN_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
 THEME_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.theme+xml"
 
 
@@ -86,7 +86,7 @@ def update_theme_fonts(
                 font_group.find(f"{{{A_NS}}}ea"),
                 ea_val, f"{level_name} ea", logger,
             )
-            for script in EA_SCRIPTS:
+            for script in EAST_ASIAN_SCRIPTS:
                 el = font_group.find(
                     f"{{{A_NS}}}font[@script='{script}']",
                 )

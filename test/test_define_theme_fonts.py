@@ -11,7 +11,7 @@ from replace_fonts import main, process_pptx_file
 
 POLICY_PATH = Path(__file__).parent / "policy.yaml"
 A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
-EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
+EAST_ASIAN_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
 
 EXPECTED_POLICY = FontPolicy(
     major_latin="Arial", major_ea="Meiryo",
@@ -88,7 +88,7 @@ def test_update_theme_fonts(workspace: tuple[Path, Path]) -> None:
     assert minor.find(f"{{{A_NS}}}latin").get("typeface") == EXPECTED_POLICY.minor_latin
     assert minor.find(f"{{{A_NS}}}ea").get("typeface") == EXPECTED_POLICY.minor_ea
 
-    for script in EA_SCRIPTS:
+    for script in EAST_ASIAN_SCRIPTS:
         major_font = major.find(f"{{{A_NS}}}font[@script='{script}']")
         assert major_font.get("typeface") == EXPECTED_POLICY.major_ea
         minor_font = minor.find(f"{{{A_NS}}}font[@script='{script}']")
@@ -107,7 +107,7 @@ def test_update_theme_fonts_logs(workspace: tuple[Path, Path]) -> None:
     log_content = log_path.read_text()
     old = ORIGINAL_THEME.major_latin
     assert f'Update theme major latin from "{old}"' in log_content
-    for script in EA_SCRIPTS:
+    for script in EAST_ASIAN_SCRIPTS:
         assert f"ea script {script}" in log_content
 
 
