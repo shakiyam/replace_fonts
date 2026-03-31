@@ -14,8 +14,8 @@ A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
 
 EXPECTED_POLICY = FontPolicy(
-    major_latin="Arial", major_ea="メイリオ",
-    minor_latin="Arial", minor_ea="メイリオ",
+    major_latin="Arial", major_ea="Meiryo",
+    minor_latin="Arial", minor_ea="Meiryo",
 )
 ORIGINAL_THEME = FontPolicy(
     major_latin="Calibri Light", major_ea="",
