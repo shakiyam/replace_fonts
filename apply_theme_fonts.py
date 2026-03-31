@@ -238,6 +238,33 @@ def process_slides(slides: Slides, preserve_code_fonts: bool, logger: Logger) ->
                 replace_shape_fonts(shape, preserve_code_fonts, logger)
 
 
+def replace_text_styles_fonts(
+    text_styles: _Element, preserve_code_fonts: bool, logger: Logger
+) -> None:
+    for text_style in text_styles:
+        if text_style.tag == qn("p:titleStyle"):
+            theme_font = ThemeFont.MAJOR
+        else:
+            theme_font = ThemeFont.MINOR
+        for list_style in text_style:
+            if isinstance(list_style, CT_TextCharacterProperties):
+                replace_properties_fonts(
+                    list_style,
+                    theme_font,
+                    preserve_code_fonts,
+                    logger,
+                )
+            else:
+                def_rpr = list_style.find(qn("a:defRPr"))
+                if def_rpr is not None:
+                    replace_properties_fonts(
+                        def_rpr,
+                        theme_font,
+                        preserve_code_fonts,
+                        logger,
+                    )
+
+
 def process_slide_masters(
     slide_masters: SlideMasters, preserve_code_fonts: bool, logger: Logger
 ) -> None:
@@ -245,28 +272,7 @@ def process_slide_masters(
         logger.log(f"--- Slide Master {i + 1} ---")
         text_styles = slide_master.element.find(qn("p:txStyles"))
         if text_styles is not None:
-            for text_style in text_styles:
-                if text_style.tag == qn("p:titleStyle"):
-                    theme_font = ThemeFont.MAJOR
-                else:
-                    theme_font = ThemeFont.MINOR
-                for list_style in text_style:
-                    if isinstance(list_style, CT_TextCharacterProperties):
-                        replace_properties_fonts(
-                            list_style,
-                            theme_font,
-                            preserve_code_fonts,
-                            logger,
-                        )
-                    else:
-                        def_rpr = list_style.find(qn("a:defRPr"))
-                        if def_rpr is not None:
-                            replace_properties_fonts(
-                                def_rpr,
-                                theme_font,
-                                preserve_code_fonts,
-                                logger,
-                            )
+            replace_text_styles_fonts(text_styles, preserve_code_fonts, logger)
         for shape in slide_master.shapes:
             replace_shape_fonts(shape, preserve_code_fonts, logger)
         for j, slide_layout in enumerate(slide_master.slide_layouts):
