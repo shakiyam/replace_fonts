@@ -39,12 +39,12 @@ def load_font_policy(path: Path) -> FontPolicy:
     if missing:
         msg = f"Font policy missing required keys: {', '.join(missing)}"
         raise ValueError(msg)
-    tf = data["theme_fonts"]
+    theme_fonts = data["theme_fonts"]
     return FontPolicy(
-        major_latin=tf["major"]["latin"],
-        major_ea=tf["major"]["ea"],
-        minor_latin=tf["minor"]["latin"],
-        minor_ea=tf["minor"]["ea"],
+        major_latin=theme_fonts["major"]["latin"],
+        major_ea=theme_fonts["major"]["ea"],
+        minor_latin=theme_fonts["minor"]["latin"],
+        minor_ea=theme_fonts["minor"]["ea"],
     )
 
 
