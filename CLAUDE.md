@@ -68,8 +68,10 @@ The project uses `uv` to manage dependencies. Edit `pyproject.toml` to add/remov
 
 ## Architecture Notes
 
-- **Main Script**: `replace_fonts.py` - Core font replacement logic using python-pptx library
-- **Font Policy**: `font_policy.py` - Font policy loading, validation, and theme font updating
+- **Main Script**: `replace_fonts.py` - CLI, file I/O, backup, entry point
+- **Logger**: `logger.py` - Log output function and LogFn type alias
+- **Define Theme Fonts**: `define_theme_fonts.py` - Font policy loading, validation, and theme font updating
+- **Apply Theme Fonts**: `apply_theme_fonts.py` - Font replacement logic, shape/slide processing
 - **Shell Wrappers**: `replace_fonts` (production) and `replace_fonts_dev` (development) - Convenient wrapper scripts for running the tool via Docker
 - **Docker Support**: Two Dockerfiles - production (`Dockerfile`) and development (`Dockerfile_dev`)
 - **Testing**:

@@ -5,8 +5,9 @@ import pytest
 from lxml import etree
 from pptx import Presentation
 
-from font_policy import FontPolicy, load_font_policy, update_theme_fonts
-from replace_fonts import log, main, process_pptx_file
+from define_theme_fonts import FontPolicy, load_font_policy, update_theme_fonts
+from logger import log
+from replace_fonts import main, process_pptx_file
 
 POLICY_PATH = Path(__file__).parent / "policy.yaml"
 A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"

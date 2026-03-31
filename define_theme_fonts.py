@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TextIO
@@ -8,8 +7,9 @@ from lxml import etree
 from lxml.etree import _Element
 from pptx.presentation import Presentation as PresentationType
 
-EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
+from logger import LogFn
 
+EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
 THEME_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.theme+xml"
 
 
@@ -45,9 +45,6 @@ def load_font_policy(path: Path) -> FontPolicy:
         minor_latin=tf["minor"]["latin"],
         minor_ea=tf["minor"]["ea"],
     )
-
-
-LogFn = Callable[[TextIO, str], None]
 
 
 def _update_theme_element(
