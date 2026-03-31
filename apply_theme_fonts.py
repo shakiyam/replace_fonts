@@ -42,7 +42,7 @@ FONT_ELEMENT_MAPPINGS = [
 ]
 
 PRESERVED_CODE_FONT = "Consolas"
-REPLACED_CODE_FONTS = ("Courier New",)
+CODE_FONTS_TO_REPLACE = ("Courier New",)
 
 
 def log_font_action(
@@ -77,7 +77,7 @@ def replace_font_element(
         log_font_action(
             theme_font, font_script, current_font, None, log_file, element_text
         )
-    elif preserve_code_fonts and current_font in REPLACED_CODE_FONTS:
+    elif preserve_code_fonts and current_font in CODE_FONTS_TO_REPLACE:
         element.set("typeface", PRESERVED_CODE_FONT)
         log_font_action(
             theme_font,
