@@ -8,7 +8,7 @@ from pptx.exc import PackageNotFoundError
 
 from apply_theme_fonts import process_presentation
 from define_theme_fonts import FontPolicy, load_font_policy, update_theme_fonts
-from logger import log
+from logger import Logger
 
 __version__ = "2026-03-31"
 
@@ -31,24 +31,26 @@ def process_pptx_file(
 ) -> None:
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "a") as log_file:
+        logger = Logger(log_file)
+
         if not dry_run:
             backup_path = create_backup(pptx_path)
-            log(log_file, f"{pptx_path} was backed up to {backup_path}.")
+            logger.log(f"{pptx_path} was backed up to {backup_path}.")
 
         presentation = Presentation(str(pptx_path))
         if dry_run:
-            log(log_file, f"{pptx_path} was opened. (dry run)")
+            logger.log(f"{pptx_path} was opened. (dry run)")
         else:
-            log(log_file, f"{pptx_path} was opened.")
+            logger.log(f"{pptx_path} was opened.")
 
         if font_policy is not None:
-            update_theme_fonts(presentation, font_policy, log_file, log)
+            update_theme_fonts(presentation, font_policy, logger)
 
-        process_presentation(presentation, preserve_code_fonts, log_file)
+        process_presentation(presentation, preserve_code_fonts, logger)
 
         if not dry_run:
             presentation.save(str(pptx_path))
-            log(log_file, f"{pptx_path} was saved.")
+            logger.log(f"{pptx_path} was saved.")
 
 
 def main() -> int:

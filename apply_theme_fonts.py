@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import TextIO
 
 from lxml.etree import _Element
 from pptx.oxml import CT_TextCharacterProperties  # type: ignore[attr-defined]
@@ -12,7 +11,7 @@ from pptx.shapes.group import GroupShape
 from pptx.slide import SlideMasters, Slides
 from pptx.text.text import TextFrame
 
-from logger import log
+from logger import Logger
 
 
 class ThemeFont(Enum):
@@ -50,7 +49,7 @@ def log_font_action(
     font_script: FontScript,
     current_font: str,
     new_font: str | None,
-    log_file: TextIO,
+    logger: Logger,
     element_text: str | None = None,
 ) -> None:
     if new_font:
@@ -60,7 +59,7 @@ def log_font_action(
         )
     else:
         message = f"Preserve {theme_font.value} {font_script.value} as {current_font}"
-    log(log_file, message, element_text)
+    logger.log(message, element_text)
 
 
 def replace_font_element(
@@ -68,14 +67,14 @@ def replace_font_element(
     theme_font: ThemeFont,
     font_script: FontScript,
     preserve_code_fonts: bool,
-    log_file: TextIO,
+    logger: Logger,
     element_text: str | None = None,
 ) -> None:
     default_font = FONT_MAPPINGS[font_script][theme_font]
     current_font = element.get("typeface")
     if preserve_code_fonts and current_font == PRESERVED_CODE_FONT:
         log_font_action(
-            theme_font, font_script, current_font, None, log_file, element_text
+            theme_font, font_script, current_font, None, logger, element_text
         )
     elif preserve_code_fonts and current_font in CODE_FONTS_TO_REPLACE:
         element.set("typeface", PRESERVED_CODE_FONT)
@@ -84,13 +83,13 @@ def replace_font_element(
             font_script,
             current_font,
             PRESERVED_CODE_FONT,
-            log_file,
+            logger,
             element_text,
         )
     elif current_font != default_font:
         element.set("typeface", default_font)
         log_font_action(
-            theme_font, font_script, current_font, default_font, log_file, element_text
+            theme_font, font_script, current_font, default_font, logger, element_text
         )
 
 
@@ -98,7 +97,7 @@ def replace_properties_fonts(
     properties: CT_TextCharacterProperties,
     theme_font: ThemeFont,
     preserve_code_fonts: bool,
-    log_file: TextIO,
+    logger: Logger,
     element_text: str | None = None,
 ) -> None:
     for qname, font_script in FONT_ELEMENT_MAPPINGS:
@@ -109,7 +108,7 @@ def replace_properties_fonts(
                 theme_font,
                 font_script,
                 preserve_code_fonts,
-                log_file,
+                logger,
                 element_text,
             )
 
@@ -118,7 +117,7 @@ def replace_text_frame_fonts(
     text_frame: TextFrame,
     theme_font: ThemeFont,
     preserve_code_fonts: bool,
-    log_file: TextIO,
+    logger: Logger,
 ) -> None:
     lst_style = text_frame._element.find(qn("a:lstStyle"))
     if lst_style is not None:
@@ -126,7 +125,7 @@ def replace_text_frame_fonts(
             def_rpr = level_ppr.find(qn("a:defRPr"))
             if def_rpr is not None:
                 replace_properties_fonts(
-                    def_rpr, theme_font, preserve_code_fonts, log_file
+                    def_rpr, theme_font, preserve_code_fonts, logger
                 )
     for paragraph in text_frame.paragraphs:
         if (
@@ -137,7 +136,7 @@ def replace_text_frame_fonts(
                 paragraph._element.pPr.defRPr,
                 theme_font,
                 preserve_code_fonts,
-                log_file,
+                logger,
             )
         for run in paragraph.runs:
             run_text = run.text.strip()
@@ -145,26 +144,26 @@ def replace_text_frame_fonts(
                 run.font._element,
                 theme_font,
                 preserve_code_fonts,
-                log_file,
+                logger,
                 run_text,
             )
         for br in paragraph._element.findall(qn("a:br")):
             br_rpr = br.find(qn("a:rPr"))
             if br_rpr is not None:
                 replace_properties_fonts(
-                    br_rpr, theme_font, preserve_code_fonts, log_file
+                    br_rpr, theme_font, preserve_code_fonts, logger
                 )
         if paragraph._element.endParaRPr is not None:
             replace_properties_fonts(
                 paragraph._element.endParaRPr,
                 theme_font,
                 preserve_code_fonts,
-                log_file,
+                logger,
             )
 
 
 def replace_shape_text_fonts(
-    shape: Shape, preserve_code_fonts: bool, log_file: TextIO
+    shape: Shape, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     placeholder = shape.element.find(f".//{qn('p:ph')}")
     if placeholder is not None and placeholder.get("type") in ["ctrTitle", "title"]:
@@ -172,78 +171,78 @@ def replace_shape_text_fonts(
     else:
         theme_font = ThemeFont.MINOR
     replace_text_frame_fonts(
-        shape.text_frame, theme_font, preserve_code_fonts, log_file
+        shape.text_frame, theme_font, preserve_code_fonts, logger
     )
 
 
 def replace_table_fonts(
-    shape: GraphicFrame, preserve_code_fonts: bool, log_file: TextIO
+    shape: GraphicFrame, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     for row in shape.table.rows:
         for cell in row.cells:
             replace_text_frame_fonts(
-                cell.text_frame, ThemeFont.MINOR, preserve_code_fonts, log_file
+                cell.text_frame, ThemeFont.MINOR, preserve_code_fonts, logger
             )
 
 
 def replace_chart_fonts(
-    shape: GraphicFrame, preserve_code_fonts: bool, log_file: TextIO
+    shape: GraphicFrame, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     for qname, font_script in FONT_ELEMENT_MAPPINGS:
         for element in shape.chart.element.findall(f".//{qname}"):
             replace_font_element(
-                element, ThemeFont.MINOR, font_script, preserve_code_fonts, log_file
+                element, ThemeFont.MINOR, font_script, preserve_code_fonts, logger
             )
 
 
 def replace_group_fonts(
-    shape: GroupShape, preserve_code_fonts: bool, log_file: TextIO
+    shape: GroupShape, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     for item in shape.shapes:
-        replace_shape_fonts(item, preserve_code_fonts, log_file)
+        replace_shape_fonts(item, preserve_code_fonts, logger)
 
 
 def replace_generic_graphicframe_fonts(
-    shape: GraphicFrame, preserve_code_fonts: bool, log_file: TextIO
+    shape: GraphicFrame, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     for qname, font_script in FONT_ELEMENT_MAPPINGS:
         for element in shape.element.findall(f".//{qname}"):
             replace_font_element(
-                element, ThemeFont.MINOR, font_script, preserve_code_fonts, log_file
+                element, ThemeFont.MINOR, font_script, preserve_code_fonts, logger
             )
 
 
 def replace_shape_fonts(
-    shape: BaseShape, preserve_code_fonts: bool, log_file: TextIO
+    shape: BaseShape, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     if isinstance(shape, Shape):
-        replace_shape_text_fonts(shape, preserve_code_fonts, log_file)
+        replace_shape_text_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GraphicFrame) and shape.has_table:
-        replace_table_fonts(shape, preserve_code_fonts, log_file)
+        replace_table_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GraphicFrame) and shape.has_chart:
-        replace_chart_fonts(shape, preserve_code_fonts, log_file)
+        replace_chart_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GraphicFrame):
-        replace_generic_graphicframe_fonts(shape, preserve_code_fonts, log_file)
+        replace_generic_graphicframe_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GroupShape):
-        replace_group_fonts(shape, preserve_code_fonts, log_file)
+        replace_group_fonts(shape, preserve_code_fonts, logger)
 
 
-def process_slides(slides: Slides, preserve_code_fonts: bool, log_file: TextIO) -> None:
+def process_slides(slides: Slides, preserve_code_fonts: bool, logger: Logger) -> None:
     for i, slide in enumerate(slides):
-        log(log_file, f"--- Slide {i + 1} ---")
+        logger.log(f"--- Slide {i + 1} ---")
         for shape in slide.shapes:
-            replace_shape_fonts(shape, preserve_code_fonts, log_file)
+            replace_shape_fonts(shape, preserve_code_fonts, logger)
         if slide.has_notes_slide:
-            log(log_file, f"--- Notes Slide {i + 1} ---")
+            logger.log(f"--- Notes Slide {i + 1} ---")
             for shape in slide.notes_slide.shapes:
-                replace_shape_fonts(shape, preserve_code_fonts, log_file)
+                replace_shape_fonts(shape, preserve_code_fonts, logger)
 
 
 def process_slide_masters(
-    slide_masters: SlideMasters, preserve_code_fonts: bool, log_file: TextIO
+    slide_masters: SlideMasters, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     for i, slide_master in enumerate(slide_masters):
-        log(log_file, f"--- Slide Master {i + 1} ---")
+        logger.log(f"--- Slide Master {i + 1} ---")
         text_styles = slide_master.element.find(qn("p:txStyles"))
         if text_styles is not None:
             for text_style in text_styles:
@@ -257,7 +256,7 @@ def process_slide_masters(
                             list_style,
                             theme_font,
                             preserve_code_fonts,
-                            log_file,
+                            logger,
                         )
                     else:
                         def_rpr = list_style.find(qn("a:defRPr"))
@@ -266,30 +265,30 @@ def process_slide_masters(
                                 def_rpr,
                                 theme_font,
                                 preserve_code_fonts,
-                                log_file,
+                                logger,
                             )
         for shape in slide_master.shapes:
-            replace_shape_fonts(shape, preserve_code_fonts, log_file)
+            replace_shape_fonts(shape, preserve_code_fonts, logger)
         for j, slide_layout in enumerate(slide_master.slide_layouts):
-            log(log_file, f"--- Slide Layout {j + 1} ---")
+            logger.log(f"--- Slide Layout {j + 1} ---")
             for shape in slide_layout.shapes:
-                replace_shape_fonts(shape, preserve_code_fonts, log_file)
+                replace_shape_fonts(shape, preserve_code_fonts, logger)
 
 
 def process_notes_master(
-    presentation: PresentationType, preserve_code_fonts: bool, log_file: TextIO
+    presentation: PresentationType, preserve_code_fonts: bool, logger: Logger
 ) -> None:
     if presentation.element.find(qn("p:notesMasterIdLst")) is None:
         return
     notes_master = presentation.notes_master
-    log(log_file, "--- Notes Master ---")
+    logger.log("--- Notes Master ---")
     for shape in notes_master.shapes:
-        replace_shape_fonts(shape, preserve_code_fonts, log_file)
+        replace_shape_fonts(shape, preserve_code_fonts, logger)
 
 
 def process_presentation(
-    presentation: PresentationType, preserve_code_fonts: bool, log_file: TextIO
+    presentation: PresentationType, preserve_code_fonts: bool, logger: Logger
 ) -> None:
-    process_slides(presentation.slides, preserve_code_fonts, log_file)
-    process_slide_masters(presentation.slide_masters, preserve_code_fonts, log_file)
-    process_notes_master(presentation, preserve_code_fonts, log_file)
+    process_slides(presentation.slides, preserve_code_fonts, logger)
+    process_slide_masters(presentation.slide_masters, preserve_code_fonts, logger)
+    process_notes_master(presentation, preserve_code_fonts, logger)

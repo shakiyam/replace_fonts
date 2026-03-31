@@ -6,7 +6,7 @@ from lxml import etree
 from pptx import Presentation
 
 from define_theme_fonts import FontPolicy, load_font_policy, update_theme_fonts
-from logger import log
+from logger import Logger
 from replace_fonts import main, process_pptx_file
 
 POLICY_PATH = Path(__file__).parent / "policy.yaml"
@@ -77,7 +77,7 @@ def test_update_theme_fonts(workspace: tuple[Path, Path]) -> None:
     prs = Presentation(str(pptx_path))
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "w") as log_file:
-        update_theme_fonts(prs, EXPECTED_POLICY, log_file, log)
+        update_theme_fonts(prs, EXPECTED_POLICY, Logger(log_file))
     prs.save(str(pptx_path))
 
     scheme = _get_font_scheme(pptx_path)
@@ -102,7 +102,7 @@ def test_update_theme_fonts_logs(workspace: tuple[Path, Path]) -> None:
     prs = Presentation(str(pptx_path))
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "w") as log_file:
-        update_theme_fonts(prs, EXPECTED_POLICY, log_file, log)
+        update_theme_fonts(prs, EXPECTED_POLICY, Logger(log_file))
 
     log_content = log_path.read_text()
     old = ORIGINAL_THEME.major_latin
@@ -118,10 +118,10 @@ def test_update_theme_fonts_no_change(workspace: tuple[Path, Path]) -> None:
     prs = Presentation(str(pptx_path))
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "w") as log_file:
-        update_theme_fonts(prs, EXPECTED_POLICY, log_file, log)
+        update_theme_fonts(prs, EXPECTED_POLICY, Logger(log_file))
 
     with open(log_path, "w") as log_file:
-        update_theme_fonts(prs, EXPECTED_POLICY, log_file, log)
+        update_theme_fonts(prs, EXPECTED_POLICY, Logger(log_file))
 
     log_content = log_path.read_text()
     assert "Update theme" not in log_content

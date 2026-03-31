@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TextIO
 
 import yaml
 from lxml import etree
 from lxml.etree import _Element
 from pptx.presentation import Presentation as PresentationType
 
-from logger import LogFn
+from logger import Logger
 
 A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
@@ -52,25 +51,20 @@ def _update_theme_element(
     element: _Element | None,
     new_val: str,
     label: str,
-    log_file: TextIO,
-    log_fn: LogFn,
+    logger: Logger,
 ) -> None:
     if element is None:
         return
     old = element.get("typeface")
     if old != new_val:
-        log_fn(
-            log_file,
-            f'Update theme {label} from "{old}" to "{new_val}"',
-        )
+        logger.log(f'Update theme {label} from "{old}" to "{new_val}"')
         element.set("typeface", new_val)
 
 
 def update_theme_fonts(
     presentation: PresentationType,
     policy: FontPolicy,
-    log_file: TextIO,
-    log_fn: LogFn,
+    logger: Logger,
 ) -> None:
     font_configs = [
         ("major", f"{{{A_NS}}}majorFont", policy.major_latin, policy.major_ea),
@@ -86,11 +80,11 @@ def update_theme_fonts(
                 continue
             _update_theme_element(
                 font_group.find(f"{{{A_NS}}}latin"),
-                latin_val, f"{level_name} latin", log_file, log_fn,
+                latin_val, f"{level_name} latin", logger,
             )
             _update_theme_element(
                 font_group.find(f"{{{A_NS}}}ea"),
-                ea_val, f"{level_name} ea", log_file, log_fn,
+                ea_val, f"{level_name} ea", logger,
             )
             for script in EA_SCRIPTS:
                 el = font_group.find(
@@ -99,7 +93,7 @@ def update_theme_fonts(
                 _update_theme_element(
                     el, ea_val,
                     f"{level_name} ea script {script}",
-                    log_file, log_fn,
+                    logger,
                 )
         part._blob = etree.tostring(
             root, xml_declaration=True,
