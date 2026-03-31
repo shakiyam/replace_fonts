@@ -136,7 +136,7 @@ def test_dry_run_does_not_modify(workspace: tuple[Path, Path]) -> None:
         pptx_path,
         preserve_code_fonts=True,
         dry_run=True,
-        font_policy_path=POLICY_PATH,
+        font_policy=load_font_policy(POLICY_PATH),
     )
 
     assert pptx_path.read_bytes() == original_content
@@ -149,7 +149,7 @@ def test_normal_run_updates_theme(workspace: tuple[Path, Path]) -> None:
     process_pptx_file(
         pptx_path,
         preserve_code_fonts=True,
-        font_policy_path=POLICY_PATH,
+        font_policy=load_font_policy(POLICY_PATH),
     )
 
     scheme = _get_font_scheme(pptx_path)
@@ -164,7 +164,7 @@ def test_with_code(workspace: tuple[Path, Path]) -> None:
     process_pptx_file(
         pptx_path,
         preserve_code_fonts=True,
-        font_policy_path=POLICY_PATH,
+        font_policy=load_font_policy(POLICY_PATH),
     )
 
     log_content = pptx_path.with_suffix(".log").read_text()

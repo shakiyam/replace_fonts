@@ -7,7 +7,7 @@ from pptx import Presentation
 from pptx.exc import PackageNotFoundError
 
 from apply_theme_fonts import process_presentation
-from define_theme_fonts import load_font_policy, update_theme_fonts
+from define_theme_fonts import FontPolicy, load_font_policy, update_theme_fonts
 from logger import log
 
 __version__ = "2026-03-31"
@@ -27,7 +27,7 @@ def process_pptx_file(
     pptx_path: Path,
     preserve_code_fonts: bool,
     dry_run: bool = False,
-    font_policy_path: Path | None = None,
+    font_policy: FontPolicy | None = None,
 ) -> None:
     log_path = pptx_path.with_suffix(".log")
     with open(log_path, "a") as log_file:
@@ -41,9 +41,8 @@ def process_pptx_file(
         else:
             log(log_file, f"{pptx_path} was opened.")
 
-        if font_policy_path is not None:
-            policy = load_font_policy(font_policy_path)
-            update_theme_fonts(presentation, policy, log_file, log)
+        if font_policy is not None:
+            update_theme_fonts(presentation, font_policy, log_file, log)
 
         process_presentation(presentation, preserve_code_fonts, log_file)
 
@@ -76,6 +75,13 @@ def main() -> int:
     preserve_code_fonts = args.code
     dry_run = args.dry_run
     font_policy_path: Path | None = args.font_policy
+    font_policy: FontPolicy | None = None
+    if font_policy_path:
+        try:
+            font_policy = load_font_policy(font_policy_path)
+        except (FileNotFoundError, ValueError) as e:
+            print(f"Error: {e}")
+            return 1
 
     if not args.files:
         print("No files specified.")
@@ -87,7 +93,7 @@ def main() -> int:
     for pptx_path_str in args.files:
         pptx_path = Path(pptx_path_str)
         try:
-            process_pptx_file(pptx_path, preserve_code_fonts, dry_run, font_policy_path)
+            process_pptx_file(pptx_path, preserve_code_fonts, dry_run, font_policy)
             success_count += 1
         except FileNotFoundError:
             print(f"Error: File not found: {pptx_path}")
