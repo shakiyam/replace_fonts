@@ -9,6 +9,7 @@ from pptx.presentation import Presentation as PresentationType
 
 from logger import LogFn
 
+A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 EA_SCRIPTS = ("Jpan", "Hang", "Hans", "Hant")
 THEME_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.theme+xml"
 
@@ -71,10 +72,9 @@ def update_theme_fonts(
     log_file: TextIO,
     log_fn: LogFn,
 ) -> None:
-    a_ns = "http://schemas.openxmlformats.org/drawingml/2006/main"
     font_configs = [
-        ("major", f"{{{a_ns}}}majorFont", policy.major_latin, policy.major_ea),
-        ("minor", f"{{{a_ns}}}minorFont", policy.minor_latin, policy.minor_ea),
+        ("major", f"{{{A_NS}}}majorFont", policy.major_latin, policy.major_ea),
+        ("minor", f"{{{A_NS}}}minorFont", policy.minor_latin, policy.minor_ea),
     ]
     for part in presentation.part.package.iter_parts():
         if part.content_type != THEME_CONTENT_TYPE:
@@ -85,16 +85,16 @@ def update_theme_fonts(
             if font_group is None:
                 continue
             _update_theme_element(
-                font_group.find(f"{{{a_ns}}}latin"),
+                font_group.find(f"{{{A_NS}}}latin"),
                 latin_val, f"{level_name} latin", log_file, log_fn,
             )
             _update_theme_element(
-                font_group.find(f"{{{a_ns}}}ea"),
+                font_group.find(f"{{{A_NS}}}ea"),
                 ea_val, f"{level_name} ea", log_file, log_fn,
             )
             for script in EA_SCRIPTS:
                 el = font_group.find(
-                    f"{{{a_ns}}}font[@script='{script}']",
+                    f"{{{A_NS}}}font[@script='{script}']",
                 )
                 _update_theme_element(
                     el, ea_val,
