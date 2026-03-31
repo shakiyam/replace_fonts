@@ -185,11 +185,12 @@ def replace_table_fonts(
             )
 
 
-def replace_chart_fonts(
+def replace_graphicframe_fonts(
     shape: GraphicFrame, preserve_code_fonts: bool, logger: Logger
 ) -> None:
+    target_element = shape.chart.element if shape.has_chart else shape.element
     for qname, font_script in FONT_ELEMENT_MAPPINGS:
-        for element in shape.chart.element.findall(f".//{qname}"):
+        for element in target_element.findall(f".//{qname}"):
             replace_font_element(
                 element, ThemeFont.MINOR, font_script, preserve_code_fonts, logger
             )
@@ -202,16 +203,6 @@ def replace_group_fonts(
         replace_shape_fonts(item, preserve_code_fonts, logger)
 
 
-def replace_generic_graphicframe_fonts(
-    shape: GraphicFrame, preserve_code_fonts: bool, logger: Logger
-) -> None:
-    for qname, font_script in FONT_ELEMENT_MAPPINGS:
-        for element in shape.element.findall(f".//{qname}"):
-            replace_font_element(
-                element, ThemeFont.MINOR, font_script, preserve_code_fonts, logger
-            )
-
-
 def replace_shape_fonts(
     shape: BaseShape, preserve_code_fonts: bool, logger: Logger
 ) -> None:
@@ -219,10 +210,8 @@ def replace_shape_fonts(
         replace_shape_text_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GraphicFrame) and shape.has_table:
         replace_table_fonts(shape, preserve_code_fonts, logger)
-    elif isinstance(shape, GraphicFrame) and shape.has_chart:
-        replace_chart_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GraphicFrame):
-        replace_generic_graphicframe_fonts(shape, preserve_code_fonts, logger)
+        replace_graphicframe_fonts(shape, preserve_code_fonts, logger)
     elif isinstance(shape, GroupShape):
         replace_group_fonts(shape, preserve_code_fonts, logger)
 
