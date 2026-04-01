@@ -33,7 +33,7 @@ def normalize_log(log_content: str) -> str:
     (True, ""),
     (False, "_nocode"),
 ])
-def test_sample_pptx(
+def test_log_output_matches_expected(
     workspace: tuple[Path, Path],
     preserve_code_fonts: bool,
     log_suffix: str,
@@ -58,6 +58,18 @@ def test_sample_pptx(
         assert actual == expected, (
             f"{name}{log_suffix}.log does not match expected output"
         )
+
+
+def test_backup_naming_conflict(workspace: tuple[Path, Path]) -> None:
+    """Test that backup creates numbered files when backup already exists."""
+    work_dir, _ = workspace
+    pptx_path = work_dir / "sample1.pptx"
+
+    process_pptx_file(pptx_path, preserve_code_fonts=True)
+    process_pptx_file(pptx_path, preserve_code_fonts=True)
+
+    assert (work_dir / "sample1 - backup.pptx").exists()
+    assert (work_dir / "sample1 - backup (2).pptx").exists()
 
 
 def test_nonexistent_pptx() -> None:
@@ -114,6 +126,23 @@ def test_no_files_specified(monkeypatch: pytest.MonkeyPatch) -> None:
     assert exit_code == 0, "Should return zero when no files specified"
 
 
+def test_cli_with_code_flag(
+    workspace: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test that --code CLI option preserves code fonts."""
+    work_dir, _ = workspace
+    pptx_path = work_dir / "sample4.pptx"
+
+    args = ["replace_fonts.py", "--code", str(pptx_path)]
+    monkeypatch.setattr("sys.argv", args)
+
+    exit_code = main()
+
+    assert exit_code == 0
+    log_content = (work_dir / "sample4.log").read_text()
+    assert "Preserve" in log_content
+
+
 def test_dry_run_does_not_modify_file(workspace: tuple[Path, Path]) -> None:
     """Test that dry run does not modify the input file."""
     work_dir, _ = workspace
@@ -155,7 +184,7 @@ def test_dry_run_creates_log(workspace: tuple[Path, Path]) -> None:
     (True, ""),
     (False, "_nocode"),
 ])
-def test_dry_run_log_matches_normal_run(
+def test_dry_run_replaces_same_fonts_as_normal_run(
     workspace: tuple[Path, Path],
     preserve_code_fonts: bool,
     log_suffix: str,
@@ -192,25 +221,6 @@ def test_dry_run_log_matches_normal_run(
         assert actual_lines == expected_lines, (
             f"{name}{log_suffix}.log dry run replacement lines do not match"
         )
-
-
-def test_dry_run_then_normal_run(workspace: tuple[Path, Path]) -> None:
-    """Test that normal run works correctly after dry run on the same file."""
-    work_dir, expected_dir = workspace
-    pptx_path = work_dir / "sample1.pptx"
-    log_path = work_dir / "sample1.log"
-
-    process_pptx_file(pptx_path, preserve_code_fonts=True, dry_run=True)
-    log_path.unlink()
-
-    process_pptx_file(pptx_path, preserve_code_fonts=True)
-
-    with open(log_path) as actual_log_file:
-        actual = normalize_log(actual_log_file.read())
-    with open(expected_dir / "sample1.log") as expected_log_file:
-        expected = normalize_log(expected_log_file.read())
-
-    assert actual == expected
 
 
 def test_dry_run_cli(

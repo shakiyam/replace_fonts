@@ -40,11 +40,13 @@ def _get_font_scheme(pptx_path: Path) -> etree._Element:
 
 
 def test_load_valid() -> None:
+    """Test that a valid YAML policy file is loaded correctly."""
     policy = load_font_policy(POLICY_PATH)
     assert policy == EXPECTED_POLICY
 
 
 def test_load_empty_yaml() -> None:
+    """Test that an empty YAML file raises ValueError."""
     with tempfile.TemporaryDirectory() as tmpdir:
         empty = Path(tmpdir) / "empty.yaml"
         empty.write_text("")
@@ -53,6 +55,7 @@ def test_load_empty_yaml() -> None:
 
 
 def test_load_missing_key() -> None:
+    """Test that a YAML file with missing keys raises ValueError."""
     with tempfile.TemporaryDirectory() as tmpdir:
         bad = Path(tmpdir) / "bad.yaml"
         bad.write_text("theme_fonts:\n  major:\n    latin: X\n")
@@ -61,11 +64,13 @@ def test_load_missing_key() -> None:
 
 
 def test_load_file_not_found() -> None:
+    """Test that a non-existent policy file raises FileNotFoundError."""
     with pytest.raises(FileNotFoundError):
         load_font_policy(Path("/nonexistent/policy.yaml"))
 
 
 def test_update_theme_fonts(workspace: tuple[Path, Path]) -> None:
+    """Test that theme fonts are updated to policy values including EA scripts."""
     work_dir, _ = workspace
     pptx_path = work_dir / SAMPLE_PPTX
 
@@ -98,7 +103,8 @@ def test_update_theme_fonts(workspace: tuple[Path, Path]) -> None:
         assert minor_font.get("typeface") == EXPECTED_POLICY.minor_ea
 
 
-def test_update_theme_fonts_logs(workspace: tuple[Path, Path]) -> None:
+def test_update_theme_fonts_log_output(workspace: tuple[Path, Path]) -> None:
+    """Test that theme font updates produce correct log output."""
     work_dir, _ = workspace
     pptx_path = work_dir / SAMPLE_PPTX
 
@@ -115,6 +121,7 @@ def test_update_theme_fonts_logs(workspace: tuple[Path, Path]) -> None:
 
 
 def test_update_theme_fonts_no_change(workspace: tuple[Path, Path]) -> None:
+    """Test that re-applying the same policy produces no log output."""
     work_dir, _ = workspace
     pptx_path = work_dir / SAMPLE_PPTX
 
@@ -130,7 +137,24 @@ def test_update_theme_fonts_no_change(workspace: tuple[Path, Path]) -> None:
     assert "Update theme" not in log_content
 
 
-def test_dry_run_does_not_modify(workspace: tuple[Path, Path]) -> None:
+def test_code_font_preservation_with_font_policy(workspace: tuple[Path, Path]) -> None:
+    """Test that code fonts are preserved when using font policy."""
+    work_dir, _ = workspace
+    pptx_path = work_dir / "sample4.pptx"
+
+    process_pptx_file(
+        pptx_path,
+        preserve_code_fonts=True,
+        font_policy=load_font_policy(POLICY_PATH),
+    )
+
+    log_content = pptx_path.with_suffix(".log").read_text()
+    assert "Update theme" in log_content
+    assert "Preserve" in log_content
+
+
+def test_dry_run_does_not_modify_with_font_policy(workspace: tuple[Path, Path]) -> None:
+    """Test that dry run with font policy does not modify the input file."""
     work_dir, _ = workspace
     pptx_path = work_dir / SAMPLE_PPTX
     original_content = pptx_path.read_bytes()
@@ -145,39 +169,10 @@ def test_dry_run_does_not_modify(workspace: tuple[Path, Path]) -> None:
     assert pptx_path.read_bytes() == original_content
 
 
-def test_normal_run_updates_theme(workspace: tuple[Path, Path]) -> None:
-    work_dir, _ = workspace
-    pptx_path = work_dir / SAMPLE_PPTX
-
-    process_pptx_file(
-        pptx_path,
-        preserve_code_fonts=True,
-        font_policy=load_font_policy(POLICY_PATH),
-    )
-
-    scheme = _get_font_scheme(pptx_path)
-    major = scheme.find(f"{{{A_NS}}}majorFont")
-    assert major.find(f"{{{A_NS}}}latin").get("typeface") == EXPECTED_POLICY.major_latin
-
-
-def test_with_code(workspace: tuple[Path, Path]) -> None:
-    work_dir, _ = workspace
-    pptx_path = work_dir / SAMPLE_PPTX
-
-    process_pptx_file(
-        pptx_path,
-        preserve_code_fonts=True,
-        font_policy=load_font_policy(POLICY_PATH),
-    )
-
-    log_content = pptx_path.with_suffix(".log").read_text()
-    assert "Update theme" in log_content
-    assert "Preserve" in log_content or "Replace" in log_content
-
-
-def test_cli(
+def test_cli_with_font_policy(
     workspace: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that --font-policy CLI option updates theme fonts."""
     work_dir, _ = workspace
     pptx_path = work_dir / SAMPLE_PPTX
 
@@ -197,9 +192,10 @@ def test_cli(
     assert major.find(f"{{{A_NS}}}latin").get("typeface") == EXPECTED_POLICY.major_latin
 
 
-def test_cli_dry_run(
+def test_cli_dry_run_with_font_policy(
     workspace: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test that --font-policy --dry-run CLI options work together."""
     work_dir, _ = workspace
     pptx_path = work_dir / SAMPLE_PPTX
     original_content = pptx_path.read_bytes()
@@ -219,3 +215,18 @@ def test_cli_dry_run(
 
     log_content = pptx_path.with_suffix(".log").read_text()
     assert "Update theme" in log_content
+
+
+def test_cli_with_invalid_font_policy(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that main() returns error for non-existent font policy file."""
+    args = [
+        "replace_fonts.py",
+        "--font-policy",
+        "/nonexistent/policy.yaml",
+        "dummy.pptx",
+    ]
+    monkeypatch.setattr("sys.argv", args)
+
+    exit_code = main()
+
+    assert exit_code == 1
