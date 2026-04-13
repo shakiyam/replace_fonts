@@ -6,9 +6,9 @@ iniconfig==2.3.0
     # via pytest
 jedi==0.19.2
     # via ptpython
-librt==0.8.1
+librt==0.9.0
     # via mypy
-lxml==6.0.2
+lxml==6.0.3
     # via python-pptx
 mypy==1.20.0
     # via replace-fonts (pyproject.toml)
@@ -32,13 +32,13 @@ pygments==2.20.0
     # via
     #   ptpython
     #   pytest
-pytest==9.0.2
+pytest==9.0.3
     # via replace-fonts (pyproject.toml)
 python-pptx==1.0.2
     # via replace-fonts (pyproject.toml)
 pyyaml==6.0.3
     # via replace-fonts (pyproject.toml)
-types-pyyaml==6.0.12.20250915
+types-pyyaml==6.0.12.20260408
     # via replace-fonts (pyproject.toml)
 typing-extensions==4.15.0
     # via
