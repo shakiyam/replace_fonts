@@ -2,7 +2,7 @@
 #    uv pip compile --strip-extras --extra dev --output-file requirements_dev.txt pyproject.toml
 appdirs==1.4.4
     # via ptpython
-ast-serialize==0.4.0
+ast-serialize==0.5.0
     # via mypy
 iniconfig==2.3.0
     # via pytest
@@ -40,7 +40,7 @@ python-pptx==1.0.2
     # via replace-fonts (pyproject.toml)
 pyyaml==6.0.3
     # via replace-fonts (pyproject.toml)
-types-pyyaml==6.0.12.20260510
+types-pyyaml==6.0.12.20260518
     # via replace-fonts (pyproject.toml)
 typing-extensions==4.15.0
     # via
