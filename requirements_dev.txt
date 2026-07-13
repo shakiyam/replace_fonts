@@ -8,11 +8,11 @@ iniconfig==2.3.0
     # via pytest
 jedi==0.20.0
     # via ptpython
-librt==0.12.0
+librt==0.13.0
     # via mypy
 lxml==6.1.1
     # via python-pptx
-mypy==2.1.0
+mypy==2.2.0
     # via replace-fonts (pyproject.toml)
 mypy-extensions==1.1.0
     # via mypy
