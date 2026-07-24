@@ -5,4 +5,6 @@ COPY requirements.txt .
 RUN uv pip install --system --no-cache-dir -r requirements.txt
 COPY apply_theme_fonts.py define_theme_fonts.py logger.py replace_fonts.py ./
 WORKDIR /work
+ARG SOURCE_COMMIT
+ENV SOURCE_COMMIT=$SOURCE_COMMIT
 ENTRYPOINT ["python3", "/opt/replace_fonts/replace_fonts.py"]
