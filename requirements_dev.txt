@@ -40,7 +40,7 @@ python-pptx==1.0.2
     # via replace-fonts (pyproject.toml)
 pyyaml==6.0.3
     # via replace-fonts (pyproject.toml)
-types-pyyaml==6.0.12.20260518
+types-pyyaml==6.0.12.20260724
     # via replace-fonts (pyproject.toml)
 typing-extensions==4.16.0
     # via
