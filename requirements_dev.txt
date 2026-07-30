@@ -26,7 +26,7 @@ pillow==12.3.0
     # via python-pptx
 pluggy==1.6.0
     # via pytest
-prompt-toolkit==3.0.52
+prompt-toolkit==3.0.53
     # via ptpython
 ptpython==3.0.32
     # via replace-fonts (pyproject.toml)
