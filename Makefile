@@ -63,7 +63,7 @@ markdownlint: ## Lint Markdown files
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/markdownlint-cli2.sh "*.md"
 
-mypy: build_dev ## Lint Python code
+mypy: build_dev ## Check Python types
 	@echo -e "\033[36m$@\033[0m"
 	@[[ -d .mypy_cache ]] || mkdir .mypy_cache
 	@./replace_fonts_dev mypy *.py test/*.py
