@@ -8,8 +8,8 @@ readonly SCRIPT_DIR
 # shellcheck disable=SC1091
 . "$SCRIPT_DIR"/container_engine.sh
 
-if command -v shfmt &>/dev/null; then
-  shfmt "$@"
+if command -v yamlfmt &>/dev/null; then
+  yamlfmt "$@"
 else
   CONTAINER_ENGINE=$(detect_container_engine)
   readonly CONTAINER_ENGINE
@@ -21,10 +21,10 @@ else
   readonly ENGINE_OPTS
 
   $CONTAINER_ENGINE container run \
-    --name "shfmt_$(uuidgen | head -c8)" \
+    --name "yamlfmt_$(uuidgen | head -c8)" \
     --rm \
     "${ENGINE_OPTS[@]}" \
     -v "$PWD":/work \
     -w /work \
-    docker.io/mvdan/shfmt:latest "$@"
+    ghcr.io/google/yamlfmt:latest "$@"
 fi

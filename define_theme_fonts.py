@@ -80,22 +80,29 @@ def update_theme_fonts(
                 continue
             _update_theme_element(
                 font_group.find(f"{{{A_NS}}}latin"),
-                latin_val, f"{level_name} latin", logger,
+                latin_val,
+                f"{level_name} latin",
+                logger,
             )
             _update_theme_element(
                 font_group.find(f"{{{A_NS}}}ea"),
-                ea_val, f"{level_name} ea", logger,
+                ea_val,
+                f"{level_name} ea",
+                logger,
             )
             for script in EAST_ASIAN_SCRIPTS:
                 el = font_group.find(
                     f"{{{A_NS}}}font[@script='{script}']",
                 )
                 _update_theme_element(
-                    el, ea_val,
+                    el,
+                    ea_val,
                     f"{level_name} ea script {script}",
                     logger,
                 )
         part._blob = etree.tostring(
-            root, xml_declaration=True,
-            encoding="UTF-8", standalone=True,
+            root,
+            xml_declaration=True,
+            encoding="UTF-8",
+            standalone=True,
         )

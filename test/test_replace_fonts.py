@@ -29,10 +29,13 @@ def normalize_log(log_content: str) -> str:
     return "\n".join(normalized)
 
 
-@pytest.mark.parametrize(("preserve_code_fonts", "log_suffix"), [
-    (True, ""),
-    (False, "_nocode"),
-])
+@pytest.mark.parametrize(
+    ("preserve_code_fonts", "log_suffix"),
+    [
+        (True, ""),
+        (False, "_nocode"),
+    ],
+)
 def test_log_output_matches_expected(
     workspace: tuple[Path, Path],
     preserve_code_fonts: bool,
@@ -180,10 +183,13 @@ def test_dry_run_creates_log(workspace: tuple[Path, Path]) -> None:
     assert "was saved." not in log_content
 
 
-@pytest.mark.parametrize(("preserve_code_fonts", "log_suffix"), [
-    (True, ""),
-    (False, "_nocode"),
-])
+@pytest.mark.parametrize(
+    ("preserve_code_fonts", "log_suffix"),
+    [
+        (True, ""),
+        (False, "_nocode"),
+    ],
+)
 def test_dry_run_replaces_same_fonts_as_normal_run(
     workspace: tuple[Path, Path],
     preserve_code_fonts: bool,
@@ -206,13 +212,15 @@ def test_dry_run_replaces_same_fonts_as_normal_run(
             expected = normalize_log(expected_log_file.read())
 
         actual_lines = [
-            line for line in actual.splitlines()
+            line
+            for line in actual.splitlines()
             if "was backed up" not in line
             and "was saved." not in line
             and "was opened." not in line
         ]
         expected_lines = [
-            line for line in expected.splitlines()
+            line
+            for line in expected.splitlines()
             if "was backed up" not in line
             and "was saved." not in line
             and "was opened." not in line

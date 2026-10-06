@@ -170,9 +170,7 @@ def replace_shape_text_fonts(
         theme_font = ThemeFont.MAJOR
     else:
         theme_font = ThemeFont.MINOR
-    replace_text_frame_fonts(
-        shape.text_frame, theme_font, preserve_code_fonts, logger
-    )
+    replace_text_frame_fonts(shape.text_frame, theme_font, preserve_code_fonts, logger)
 
 
 def replace_table_fonts(

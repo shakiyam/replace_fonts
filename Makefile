@@ -6,7 +6,7 @@ ALL_TARGETS := $(shell grep -E -o ^[0-9A-Za-z_-]+: $(MAKEFILE_LIST) | sed 's/://
 .PHONY: $(ALL_TARGETS)
 .DEFAULT_GOAL := help
 
-all: check_for_updates lint update_requirements_dev build_dev mypy pytest update_requirements build test ## Check for updates, lint, update requirements.txt, build, and test
+all: check_for_updates format lint update_requirements_dev build_dev mypy pytest update_requirements build test ## Check for updates, format, lint, update requirements.txt, build, and test
 
 build: ## Build image replace_fonts from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -32,6 +32,12 @@ check_for_image_updates: ## Check for image updates
 
 check_for_updates: check_for_action_updates check_for_image_updates ## Check for updates to all dependencies
 
+dockerfmt: ## Format Dockerfile
+	@echo -e "\033[36m$@\033[0m"
+	@./tools/dockerfmt.sh -i 2 -n -w Dockerfile Dockerfile_dev
+
+format: dockerfmt ruff_format shfmt yamlfmt ## Run all formatting
+
 hadolint: ## Lint Dockerfile
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/hadolint.sh Dockerfile Dockerfile_dev
@@ -47,7 +53,7 @@ hooks: ## Install git hooks
 	@ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
 	@echo "Git hooks installed"
 
-lint: ruff hadolint markdownlint shellcheck shfmt ## Lint for all dependencies
+lint: ruff hadolint markdownlint shellcheck ## Lint for all dependencies
 
 markdownlint: ## Lint Markdown files
 	@echo -e "\033[36m$@\033[0m"
@@ -66,13 +72,17 @@ ruff: ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/ruff.sh check
 
+ruff_format: ## Format Python code
+	@echo -e "\033[36m$@\033[0m"
+	@./tools/ruff.sh format
+
 shellcheck: ## Lint shell scripts
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/shellcheck.sh replace_fonts replace_fonts_dev test/*.sh tools/*.sh hooks/*
 
-shfmt: ## Lint shell scripts
+shfmt: ## Format shell scripts
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/shfmt.sh -l -d -i 2 -ci -bn replace_fonts replace_fonts_dev test/*.sh tools/*.sh hooks/*
+	@./tools/shfmt.sh -l -w -i 2 -ci -bn replace_fonts replace_fonts_dev test/*.sh tools/*.sh hooks/*
 
 test: ## Test replace_fonts
 	@echo -e "\033[36m$@\033[0m"
@@ -85,3 +95,7 @@ update_requirements: ## Update requirements.txt
 update_requirements_dev: ## Update requirements_dev.txt
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/uv.sh pip compile --upgrade --strip-extras --extra dev --output-file requirements_dev.txt pyproject.toml
+
+yamlfmt: ## Format YAML files
+	@echo -e "\033[36m$@\033[0m"
+	@./tools/yamlfmt.sh .github/workflows/*.yml

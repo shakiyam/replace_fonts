@@ -17,12 +17,16 @@ from replace_fonts import main, process_pptx_file
 
 POLICY_PATH = Path(__file__).parent / "policy.yaml"
 EXPECTED_POLICY = FontPolicy(
-    major_latin="Arial", major_ea="Meiryo",
-    minor_latin="Arial", minor_ea="Meiryo",
+    major_latin="Arial",
+    major_ea="Meiryo",
+    minor_latin="Arial",
+    minor_ea="Meiryo",
 )
 ORIGINAL_THEME = FontPolicy(
-    major_latin="Calibri Light", major_ea="",
-    minor_latin="Constantia", minor_ea="",
+    major_latin="Calibri Light",
+    major_ea="",
+    minor_latin="Constantia",
+    minor_ea="",
 )
 SAMPLE_PPTX = "sample1.pptx"
 

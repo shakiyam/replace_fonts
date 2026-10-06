@@ -10,6 +10,18 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Run make format
+        run: make format
+      - name: Run check_for_file_updates.sh
+        run: ./tools/check_for_file_updates.sh
   ruff:
     name: Ruff
     runs-on: ubuntu-latest
@@ -50,22 +62,12 @@ jobs:
           persist-credentials: false
       - name: Run make shellcheck
         run: make shellcheck
-  shfmt:
-    name: shfmt
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - name: Run make shfmt
-        run: make shfmt
   build:
     name: Build and Push
     permissions:
       contents: read
       packages: write
-    needs: [ruff, hadolint, markdownlint, shellcheck, shfmt]
+    needs: [format, ruff, hadolint, markdownlint, shellcheck]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:

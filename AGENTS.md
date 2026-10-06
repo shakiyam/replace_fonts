@@ -20,7 +20,7 @@ This installs a pre-commit hook that automatically updates the version number in
 ### Building and Testing
 
 ```bash
-# Run all checks (lint, update requirements, build, test)
+# Run all checks (check for updates, format, lint, update requirements, build, test)
 make all
 
 # Run pytest tests
@@ -30,18 +30,20 @@ make pytest
 make test
 ```
 
-### Linting and Type Checking
+### Formatting, Linting, and Type Checking
 
 ```bash
-# Run all linting
+# Run all formatters (rewrites files in place)
+make format
+
+# Run all linters
 make lint
 
-# Individual linters:
-make ruff      # Python linting
-make hadolint  # Dockerfile linting
-make shellcheck # Shell script linting
-make shfmt     # Shell script formatting
-make mypy      # Python type checking
+# Run Python type checking
+make mypy
+
+# List all targets, including individual formatters and linters
+make help
 ```
 
 ### Building Docker Images
@@ -93,7 +95,7 @@ The project uses `uv` to manage dependencies. Edit `pyproject.toml` to add/remov
 
 ## File Structure
 
-- **`tools/`**: Containerized development tool wrappers (hadolint, ruff, shellcheck, shfmt, uv) - project-independent tools using standalone Docker images
+- **`tools/`**: Containerized development tool wrappers - project-independent tools using standalone Docker images or binaries
 - **`replace_fonts_dev`**: Wrapper script for project-dependent tools (mypy, pytest) using the replace_fonts_dev Docker image
 - **`test/`**: Test suite with sample PPTX files, test scripts, and expected log outputs
   - `test/original/`: Sample PPTX files for testing
