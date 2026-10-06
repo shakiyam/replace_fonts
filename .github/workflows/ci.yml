@@ -34,12 +34,42 @@ jobs:
         run: make --keep-going lint
         env:
           GH_TOKEN: ${{ github.token }}
+  mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Run make mypy
+        run: make mypy
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Run make pytest
+        run: make pytest
+  test:
+    name: Test the application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Run make test
+        run: make test
   build:
     name: Build and Push
     permissions:
       contents: read
       packages: write
-    needs: [format, lint]
+    needs: [format, lint, mypy, pytest, test]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:

@@ -63,12 +63,12 @@ markdownlint: ## Lint Markdown files
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/markdownlint-cli2.sh "*.md"
 
-mypy: ## Lint Python code
+mypy: build_dev ## Lint Python code
 	@echo -e "\033[36m$@\033[0m"
 	@[[ -d .mypy_cache ]] || mkdir .mypy_cache
 	@./replace_fonts_dev mypy *.py test/*.py
 
-pytest: ## Run pytest
+pytest: build_dev ## Run pytest
 	@echo -e "\033[36m$@\033[0m"
 	@./replace_fonts_dev pytest
 
@@ -88,7 +88,7 @@ shfmt: ## Format shell scripts
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/shfmt.sh -l -w -i 2 -ci -bn replace_fonts replace_fonts_dev test/*.sh tools/*.sh hooks/*
 
-test: ## Test replace_fonts
+test: build ## Test replace_fonts
 	@echo -e "\033[36m$@\033[0m"
 	@./test/run.sh
 
