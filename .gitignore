@@ -4,3 +4,4 @@ test/sample*.log
 test/sample*.pptx
 test/failures/
 dockerfmt
+regctl
