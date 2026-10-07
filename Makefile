@@ -10,7 +10,7 @@ actionlint: ## Lint GitHub Actions workflow files
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/actionlint.sh
 
-all: check_for_updates format lint update_requirements_dev build_dev mypy pytest update_requirements build test ## Check for updates, format, lint, update requirements.txt, build, and test
+all: check_for_updates format lint update_requirements_dev build_dev mypy pytest update_requirements build trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, and test
 
 build: ## Build image replace_fonts from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -91,6 +91,10 @@ shfmt: ## Format shell scripts
 test: build ## Test replace_fonts
 	@echo -e "\033[36m$@\033[0m"
 	@./test/run.sh
+
+trivy: build ## Scan Docker image for vulnerabilities
+	@echo -e "\033[36m$@\033[0m"
+	@./tools/trivy.sh image --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 ghcr.io/shakiyam/replace_fonts | sed -n '/^Total:/,$$p'
 
 update_requirements: ## Update requirements.txt
 	@echo -e "\033[36m$@\033[0m"
