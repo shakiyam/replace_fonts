@@ -30,5 +30,8 @@ $CONTAINER_ENGINE container run \
   -i \
   $TTY_FLAGS \
   -v "$PWD":/work \
-  -v "$SCRIPT_DIR"/replace_fonts.py:/opt/replace_fonts/replace_fonts.py \
+  -v "$SCRIPT_DIR"/apply_theme_fonts.py:/opt/replace_fonts/apply_theme_fonts.py:ro \
+  -v "$SCRIPT_DIR"/define_theme_fonts.py:/opt/replace_fonts/define_theme_fonts.py:ro \
+  -v "$SCRIPT_DIR"/logger.py:/opt/replace_fonts/logger.py:ro \
+  -v "$SCRIPT_DIR"/replace_fonts.py:/opt/replace_fonts/replace_fonts.py:ro \
   ghcr.io/shakiyam/replace_fonts_dev "$@"
