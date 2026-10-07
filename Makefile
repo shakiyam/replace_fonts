@@ -10,7 +10,7 @@ actionlint: ## Lint GitHub Actions workflow files
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/actionlint.sh
 
-all: check_for_updates format lint update_requirements_dev build_dev mypy pytest update_requirements build trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, and test
+all: check_for_updates format lint update_requirements_dev build_dev mypy pytest update_requirements build dive trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, and test
 
 build: ## Build image replace_fonts from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -35,6 +35,10 @@ check_for_image_updates: ## Check for image updates
 	@./tools/check_for_image_updates.sh "$$(awk -F'"' '/readonly UV_IMAGE=/{print $$2; exit}' tools/uv.sh)" ghcr.io/astral-sh/uv:python3.14-trixie-slim
 
 check_for_updates: check_for_action_updates check_for_image_updates ## Check for updates to all dependencies
+
+dive: build ## Analyze Docker image layers
+	@echo -e "\033[36m$@\033[0m"
+	@./tools/dive.sh --ci ghcr.io/shakiyam/replace_fonts | awk '/Inefficient Files:/{skip=1} /Results:/{skip=0} !skip'
 
 dockerfmt: ## Format Dockerfile
 	@echo -e "\033[36m$@\033[0m"
