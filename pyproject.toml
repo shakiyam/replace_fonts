@@ -9,8 +9,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "mypy",
-    "pytest",
+    "pip-licenses",
     "ptpython",
+    "pytest",
     "types-pyyaml",
 ]
 

@@ -10,7 +10,7 @@ actionlint: ## Lint GitHub Actions workflow files
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/actionlint.sh
 
-all: check_for_updates format lint update_requirements_dev build_dev mypy pytest update_requirements build dive trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, and test
+all: check_for_updates format lint update_requirements_dev build_dev mypy pip_licenses pytest update_requirements build dive trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, check licenses, and test
 
 build: ## Build image replace_fonts from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -71,6 +71,10 @@ mypy: build_dev ## Check Python types
 	@echo -e "\033[36m$@\033[0m"
 	@[[ -d .mypy_cache ]] || mkdir .mypy_cache
 	@./replace_fonts_dev mypy *.py test/*.py
+
+pip_licenses: build_dev ## Check licenses of Python dependencies
+	@echo -e "\033[36m$@\033[0m"
+	@./replace_fonts_dev pip-licenses --with-system --allow-only="Apache-2.0;Apache-2.0 OR BSD-2-Clause;BSD License;BSD-2-Clause;BSD-3-Clause;MIT;MIT License;MIT-CMU;Mozilla Public License 2.0 (MPL 2.0);PSF-2.0"
 
 pytest: build_dev ## Run pytest
 	@echo -e "\033[36m$@\033[0m"

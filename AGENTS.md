@@ -20,7 +20,7 @@ This installs a pre-commit hook that automatically updates the version number in
 ### Building and Testing
 
 ```bash
-# Run all checks (check for updates, format, lint, update requirements, build, scan image, test)
+# Run all checks (check for updates, format, lint, update requirements, build, scan image, check licenses, test)
 make all
 
 # Run pytest tests
