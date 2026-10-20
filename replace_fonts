@@ -30,4 +30,7 @@ elif command -v python3 &>/dev/null; then
   python3 "$SCRIPT_DIR"/replace_fonts.py "$@"
 elif command -v python &>/dev/null; then
   python "$SCRIPT_DIR"/replace_fonts.py "$@"
+else
+  echo "Error: docker, podman, or python is required to run replace_fonts" >&2
+  exit 1
 fi
