@@ -1,3 +1,0 @@
-# TODO
-
-1. Move to Python 3.15 once its prerequisites are available. As of 2026-10-13, `make check_for_image_updates` fails because `python:slim` is 3.15.0, but `ghcr.io/astral-sh/uv:0.13-python3.15-trixie-slim` (and `uv:python3.15-trixie-slim`) do not exist yet, and PyYAML 6.0.3 has no cp315 wheel (`python:3.15-slim` has no compiler to build it). All other pinned packages already provide 3.15 wheels. When both are available, update `FROM` in `Dockerfile` and `Dockerfile_dev`, `UV_IMAGE` in `tools/uv.sh`, and the comparison tag in the `check_for_image_updates` target of `Makefile`, then regenerate the requirements and run `make all`.

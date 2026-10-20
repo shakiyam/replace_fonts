@@ -1,4 +1,4 @@
-FROM python:3.14-slim-trixie
+FROM python:3.15-slim-trixie
 WORKDIR /opt/replace_fonts
 COPY requirements.txt .
 # pip comes from the base image and is unused at runtime; removing it clears trivy findings in its bundled libraries
