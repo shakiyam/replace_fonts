@@ -1,3 +1,5 @@
+__version__ = "2026-10-20"
+
 import argparse
 import shutil
 import zipfile
@@ -9,8 +11,6 @@ from pptx.exc import PackageNotFoundError
 from apply_theme_fonts import process_presentation
 from define_theme_fonts import FontPolicy, load_font_policy, update_theme_fonts
 from logger import Logger
-
-__version__ = "2026-04-01"
 
 
 def create_backup(path: Path) -> Path:
