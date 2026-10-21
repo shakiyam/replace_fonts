@@ -1,6 +1,7 @@
 [project]
 name = "replace-fonts"
 version = "0.0.0"  # Formal value only; actual version managed in __version__
+requires-python = ">=3.10"
 dependencies = [
     "python-pptx",
     "pyyaml",
