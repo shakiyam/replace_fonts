@@ -16,9 +16,9 @@ build: ## Build image 'shakiyam/replace_fonts' from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/build.sh ghcr.io/shakiyam/replace_fonts Dockerfile
 
-build_dev: ## Build image 'shakiyam/replace_fonts_dev' from Dockerfile_dev
+build_dev: ## Build image 'shakiyam/replace_fonts_dev' from dev.Dockerfile
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/build.sh ghcr.io/shakiyam/replace_fonts_dev Dockerfile_dev
+	@./tools/build.sh ghcr.io/shakiyam/replace_fonts_dev dev.Dockerfile
 
 check_for_action_updates: ## Check for GitHub Actions updates
 	@echo -e "\033[36m$@\033[0m"
@@ -42,13 +42,13 @@ dive: build ## Analyze Docker image layers
 
 dockerfmt: ## Format Dockerfile
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/dockerfmt.sh -i 2 -n -w Dockerfile Dockerfile_dev
+	@./tools/dockerfmt.sh -i 2 -n -w Dockerfile dev.Dockerfile
 
 format: dockerfmt ruff_format shfmt yamlfmt ## Run all formatting
 
 hadolint: ## Lint Dockerfile
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/hadolint.sh Dockerfile Dockerfile_dev
+	@./tools/hadolint.sh Dockerfile dev.Dockerfile
 
 help: ## Print this help
 	@echo 'Usage: make [target]'

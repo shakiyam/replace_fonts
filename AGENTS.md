@@ -75,8 +75,8 @@ The project uses `uv` to manage dependencies. Edit `pyproject.toml` to add/remov
 - **Define Theme Fonts**: `define_theme_fonts.py` - Font policy loading, validation, and theme font updating
 - **Apply Theme Fonts**: `apply_theme_fonts.py` - Font replacement logic, shape/slide processing
 - **Shell Wrappers**: `replace_fonts` (production) and `replace_fonts_dev` (development) - Convenient wrapper scripts for running the tool via Docker
-- **Docker Support**: Two Dockerfiles - production (`Dockerfile`) and development (`Dockerfile_dev`)
-- **Module List**: When adding or removing a Python module, update the module lists in `Dockerfile`, `Dockerfile_dev` (COPY), and `replace_fonts_dev` (mounts that override the image copies with the working tree)
+- **Docker Support**: Two Dockerfiles - production (`Dockerfile`) and development (`dev.Dockerfile`)
+- **Module List**: When adding or removing a Python module, update the module lists in `Dockerfile`, `dev.Dockerfile` (COPY), and `replace_fonts_dev` (mounts that override the image copies with the working tree)
 - **Testing**:
   - pytest-based unit tests in `test/test_replace_fonts.py`
   - Integration tests in `test/run.sh` using sample files
