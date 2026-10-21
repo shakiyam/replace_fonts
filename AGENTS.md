@@ -89,10 +89,6 @@ The project uses `uv` to manage dependencies. Edit `pyproject.toml` to add/remov
 1. The project uses containerized tools for consistency - most development tools (ruff, hadolint, shellcheck, etc.) run inside Docker containers
 2. When running Python code for testing or verification, always use `./replace_fonts_dev python3` instead of the host's `python3` to ensure correct dependencies and environment
 3. All shell scripts and tools follow strict error handling (`set -Eeu -o pipefail`)
-4. Type hints are used throughout the codebase for type safety
-5. Before implementing changes, run tests first to understand current behavior
-6. Make changes incrementally in small, verifiable steps
-7. Run tests after changes to verify behavior
 
 ## File Structure
 
@@ -106,9 +102,5 @@ The project uses `uv` to manage dependencies. Edit `pyproject.toml` to add/remov
 
 ## Code Style
 
-- Use type hints for all function parameters and return values
-- Follow existing naming conventions (clear, descriptive variable names)
-- Eliminate code duplication by extracting common patterns
-- Keep functions focused on single responsibilities
 - Use Enums for related constants (e.g., ThemeFont, FontScript)
 - Use mapping dictionaries to eliminate repetitive conditional logic
