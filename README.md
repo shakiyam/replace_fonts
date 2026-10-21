@@ -24,6 +24,8 @@ Windows:
 py -m pip install python-pptx pyyaml
 ```
 
+PyYAML does not yet provide wheels for Python 3.15, so installing it on Windows with Python 3.15 requires Microsoft C++ Build Tools. Until it does, use Python 3.14 by running `py -3.14` instead of `py` in the Windows commands in this README.
+
 Linux/macOS:
 
 ```console
