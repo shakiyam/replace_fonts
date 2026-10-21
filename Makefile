@@ -12,11 +12,11 @@ actionlint: ## Lint GitHub Actions workflow files
 
 all: check_for_updates format lint update_requirements_dev build_dev mypy pip_licenses pytest update_requirements build dive trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, check licenses, and test
 
-build: ## Build image replace_fonts from Dockerfile
+build: ## Build image 'shakiyam/replace_fonts' from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/build.sh ghcr.io/shakiyam/replace_fonts Dockerfile
 
-build_dev: ## Build image replace_fonts_dev from Dockerfile_dev
+build_dev: ## Build image 'shakiyam/replace_fonts_dev' from Dockerfile_dev
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/build.sh ghcr.io/shakiyam/replace_fonts_dev Dockerfile_dev
 
