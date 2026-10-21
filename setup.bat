@@ -1,1 +1,1 @@
-py -m pip install --upgrade python-pptx pywin32
+py -m pip install --upgrade python-pptx pyyaml pywin32
