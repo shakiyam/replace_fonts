@@ -10,5 +10,5 @@ pyyaml==6.0.3
     # via replace-fonts (pyproject.toml)
 typing-extensions==4.16.0
     # via python-pptx
-xlsxwriter==3.2.9
+xlsxwriter==3.3.0
     # via python-pptx
