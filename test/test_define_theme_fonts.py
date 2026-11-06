@@ -1,4 +1,5 @@
 import tempfile
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,7 @@ from define_theme_fonts import (
 from logger import Logger
 from replace_fonts import main, process_pptx_file
 
-POLICY_PATH = Path(__file__).parent / "policy.yaml"
+POLICY_PATH = Path(__file__).parent / "policy.toml"
 EXPECTED_POLICY = FontPolicy(
     major_latin="Arial",
     major_ea="Meiryo",
@@ -44,33 +45,52 @@ def _get_font_scheme(pptx_path: Path) -> etree._Element:
 
 
 def test_load_valid() -> None:
-    """Test that a valid YAML policy file is loaded correctly."""
+    """Test that a valid TOML policy file is loaded correctly."""
     policy = load_font_policy(POLICY_PATH)
     assert policy == EXPECTED_POLICY
 
 
-def test_load_empty_yaml() -> None:
-    """Test that an empty YAML file raises ValueError."""
+def test_load_empty_toml() -> None:
+    """Test that an empty TOML file raises ValueError for missing keys."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        empty = Path(tmpdir) / "empty.yaml"
+        empty = Path(tmpdir) / "empty.toml"
         empty.write_text("")
-        with pytest.raises(ValueError, match="mapping"):
+        with pytest.raises(ValueError, match="missing"):
             load_font_policy(empty)
 
 
 def test_load_missing_key() -> None:
-    """Test that a YAML file with missing keys raises ValueError."""
+    """Test that a TOML file with missing keys raises ValueError."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        bad = Path(tmpdir) / "bad.yaml"
-        bad.write_text("theme_fonts:\n  major:\n    latin: X\n")
+        bad = Path(tmpdir) / "bad.toml"
+        bad.write_text('[theme_fonts.major]\nlatin = "X"\n')
         with pytest.raises(ValueError, match="missing"):
             load_font_policy(bad)
+
+
+def test_load_invalid_toml() -> None:
+    """Test that a file with TOML syntax errors raises TOMLDecodeError."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        broken = Path(tmpdir) / "broken.toml"
+        broken.write_text("[theme_fonts.major\n")
+        with pytest.raises(tomllib.TOMLDecodeError):
+            load_font_policy(broken)
+
+
+@pytest.mark.parametrize("suffix", [".yaml", ".yml"])
+def test_load_yaml_rejected(suffix: str) -> None:
+    """Test that a YAML policy file is rejected with a hint to convert it to TOML."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        legacy = Path(tmpdir) / f"policy{suffix}"
+        legacy.write_text("theme_fonts:\n  major:\n    latin: X\n")
+        with pytest.raises(ValueError, match="TOML"):
+            load_font_policy(legacy)
 
 
 def test_load_file_not_found() -> None:
     """Test that a non-existent policy file raises FileNotFoundError."""
     with pytest.raises(FileNotFoundError):
-        load_font_policy(Path("/nonexistent/policy.yaml"))
+        load_font_policy(Path("/nonexistent/policy.toml"))
 
 
 def test_update_theme_fonts(workspace: tuple[Path, Path]) -> None:
@@ -226,11 +246,29 @@ def test_cli_with_invalid_font_policy(monkeypatch: pytest.MonkeyPatch) -> None:
     args = [
         "replace_fonts.py",
         "--font-policy",
-        "/nonexistent/policy.yaml",
+        "/nonexistent/policy.toml",
         "dummy.pptx",
     ]
     monkeypatch.setattr("sys.argv", args)
 
     exit_code = main()
+
+    assert exit_code == 1
+
+
+def test_cli_with_malformed_font_policy(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that main() returns error for a font policy file with TOML syntax errors."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        broken = Path(tmpdir) / "broken.toml"
+        broken.write_text("[theme_fonts.major\n")
+        args = [
+            "replace_fonts.py",
+            "--font-policy",
+            str(broken),
+            "dummy.pptx",
+        ]
+        monkeypatch.setattr("sys.argv", args)
+
+        exit_code = main()
 
     assert exit_code == 1

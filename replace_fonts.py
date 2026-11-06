@@ -1,4 +1,4 @@
-__version__ = "2026-10-20"
+__version__ = "2026-11-06"
 
 import argparse
 import shutil
@@ -70,7 +70,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--font-policy",
-        help="YAML file defining font policy for theme fonts",
+        help="TOML file defining font policy for theme fonts",
         type=Path,
     )
     args = parser.parse_args()

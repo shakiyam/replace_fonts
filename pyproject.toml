@@ -4,7 +4,6 @@ version = "0.0.0"  # Formal value only; actual version managed in __version__
 requires-python = ">=3.11"
 dependencies = [
     "python-pptx",
-    "pyyaml",
 ]
 
 [project.optional-dependencies]
@@ -13,7 +12,6 @@ dev = [
     "pip-licenses",
     "ptpython",
     "pytest",
-    "types-pyyaml",
 ]
 
 [tool.mypy]

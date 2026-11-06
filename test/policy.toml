@@ -1,0 +1,7 @@
+[theme_fonts.major]
+latin = "Arial"
+ea = "Meiryo"
+
+[theme_fonts.minor]
+latin = "Arial"
+ea = "Meiryo"

@@ -16,26 +16,24 @@ replace_fonts solves this problem. replace_fonts fixes the fonts in a PowerPoint
 Requirements
 ------------
 
-replace_fonts requires python-pptx and PyYAML.
+replace_fonts requires Python 3.11 or later and python-pptx.
 
 Windows:
 
 ```console
-py -m pip install python-pptx pyyaml
+py -m pip install python-pptx
 ```
-
-PyYAML does not yet provide wheels for Python 3.15, so installing it on Windows with Python 3.15 requires Microsoft C++ Build Tools. Until it does, use Python 3.14 by running `py -3.14` instead of `py` in the Windows commands in this README.
 
 Linux/macOS:
 
 ```console
-python3 -m pip install python-pptx pyyaml
+python3 -m pip install python-pptx
 ```
 
 Or using uv:
 
 ```console
-uv pip install --system python-pptx pyyaml
+uv pip install --system python-pptx
 ```
 
 Usage
@@ -46,13 +44,13 @@ Specify PowerPoint files as arguments.
 Windows:
 
 ```console
-py replace_fonts.py [-h] [--code] [--dry-run] [--font-policy YAML] [files ...]
+py replace_fonts.py [-h] [--code] [--dry-run] [--font-policy TOML] [files ...]
 ```
 
 Linux/macOS:
 
 ```console
-python3 replace_fonts.py [-h] [--code] [--dry-run] [--font-policy YAML] [files ...]
+python3 replace_fonts.py [-h] [--code] [--dry-run] [--font-policy TOML] [files ...]
 ```
 
 Options:
@@ -62,18 +60,18 @@ Option             | Description
 -h, --help         | show help message and exit
 --code             | preserve code fonts
 --dry-run          | preview font replacements without modifying files
---font-policy YAML | apply font policy to update theme fonts
+--font-policy TOML | apply font policy to update theme fonts
 
-The font policy YAML file specifies the theme fonts to apply. All four keys are required:
+The font policy TOML file specifies the theme fonts to apply. All four keys are required:
 
-```yaml
-theme_fonts:
-  major:              # Heading font
-    latin: "Arial"
-    ea: "Meiryo"
-  minor:              # Body font
-    latin: "Arial"
-    ea: "Meiryo"
+```toml
+[theme_fonts.major]  # Heading font
+latin = "Arial"
+ea = "Meiryo"
+
+[theme_fonts.minor]  # Body font
+latin = "Arial"
+ea = "Meiryo"
 ```
 
 * replace_fonts backs up the specified file sequentially, opens it, replaces the fonts, and saves it. (For example, `sample.pptx` is backed up to `sample - backup.pptx`.)

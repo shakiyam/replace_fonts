@@ -6,8 +6,6 @@ pillow==13.0.0
     # via python-pptx
 python-pptx==1.0.2
     # via replace-fonts (pyproject.toml)
-pyyaml==6.0.3
-    # via replace-fonts (pyproject.toml)
 typing-extensions==4.16.0
     # via python-pptx
 xlsxwriter==3.3.1

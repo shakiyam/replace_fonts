@@ -1,7 +1,7 @@
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
-import yaml
 from lxml import etree
 from lxml.etree import _Element
 from pptx.presentation import Presentation as PresentationType
@@ -22,11 +22,11 @@ class FontPolicy:
 
 
 def load_font_policy(path: Path) -> FontPolicy:
-    with open(path) as f:
-        data = yaml.safe_load(f)
-    if not isinstance(data, dict):
-        msg = "Font policy must be a YAML mapping"
+    if path.suffix.lower() in (".yaml", ".yml"):
+        msg = f"YAML font policies are no longer supported; convert {path} to TOML"
         raise ValueError(msg)
+    with open(path, "rb") as f:
+        data = tomllib.load(f)
     missing = []
     for level in ("major", "minor"):
         if not isinstance(data.get("theme_fonts", {}).get(level), dict):
