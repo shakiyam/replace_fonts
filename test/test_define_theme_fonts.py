@@ -68,6 +68,27 @@ def test_load_missing_key() -> None:
             load_font_policy(bad)
 
 
+def test_load_theme_fonts_not_table() -> None:
+    """Test that a non-table theme_fonts raises ValueError for missing keys."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        bad = Path(tmpdir) / "bad.toml"
+        bad.write_text('theme_fonts = "Arial"\n')
+        with pytest.raises(ValueError, match="missing"):
+            load_font_policy(bad)
+
+
+def test_load_non_string_value() -> None:
+    """Test that a non-string font name raises ValueError."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        bad = Path(tmpdir) / "bad.toml"
+        bad.write_text(
+            '[theme_fonts.major]\nlatin = 1\nea = "Meiryo"\n'
+            '[theme_fonts.minor]\nlatin = "Arial"\nea = "Meiryo"\n'
+        )
+        with pytest.raises(ValueError, match=r"strings: theme_fonts\.major\.latin$"):
+            load_font_policy(bad)
+
+
 def test_load_invalid_toml() -> None:
     """Test that a file with TOML syntax errors raises TOMLDecodeError."""
     with tempfile.TemporaryDirectory() as tmpdir:

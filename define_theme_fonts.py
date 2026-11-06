@@ -27,18 +27,26 @@ def load_font_policy(path: Path) -> FontPolicy:
         raise ValueError(msg)
     with open(path, "rb") as f:
         data = tomllib.load(f)
+    theme_fonts = data.get("theme_fonts")
+    if not isinstance(theme_fonts, dict):
+        theme_fonts = {}
     missing = []
+    non_string = []
     for level in ("major", "minor"):
-        if not isinstance(data.get("theme_fonts", {}).get(level), dict):
+        if not isinstance(theme_fonts.get(level), dict):
             missing.extend([f"theme_fonts.{level}.latin", f"theme_fonts.{level}.ea"])
             continue
         for key in ("latin", "ea"):
-            if key not in data["theme_fonts"][level]:
+            if key not in theme_fonts[level]:
                 missing.append(f"theme_fonts.{level}.{key}")
+            elif not isinstance(theme_fonts[level][key], str):
+                non_string.append(f"theme_fonts.{level}.{key}")
     if missing:
         msg = f"Font policy missing required keys: {', '.join(missing)}"
         raise ValueError(msg)
-    theme_fonts = data["theme_fonts"]
+    if non_string:
+        msg = f"Font policy values must be strings: {', '.join(non_string)}"
+        raise ValueError(msg)
     return FontPolicy(
         major_latin=theme_fonts["major"]["latin"],
         major_ea=theme_fonts["major"]["ea"],
