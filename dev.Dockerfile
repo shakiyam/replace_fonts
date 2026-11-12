@@ -9,5 +9,5 @@ ENV HOME=/tmp
 ENV PYTHONPATH=/opt/replace_fonts:/work
 ENV PYTHONDONTWRITEBYTECODE=1
 ARG SOURCE_COMMIT
-ENV SOURCE_COMMIT=$SOURCE_COMMIT
+LABEL org.opencontainers.image.revision=$SOURCE_COMMIT
 CMD ["/bin/bash"]

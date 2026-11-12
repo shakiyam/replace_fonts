@@ -13,5 +13,5 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.13,source=/uv,target=/bin/uv \
 COPY apply_theme_fonts.py define_theme_fonts.py logger.py replace_fonts.py ./
 WORKDIR /work
 ARG SOURCE_COMMIT
-ENV SOURCE_COMMIT=$SOURCE_COMMIT
+LABEL org.opencontainers.image.revision=$SOURCE_COMMIT
 ENTRYPOINT ["python3", "/opt/replace_fonts/replace_fonts.py"]
