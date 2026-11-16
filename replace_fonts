@@ -19,10 +19,14 @@ if command -v docker &>/dev/null; then
     -v "$PWD":/work \
     ghcr.io/shakiyam/replace_fonts "$@"
 elif command -v podman &>/dev/null; then
+  # The image runs as a non-root USER, which rootless Podman maps to a subuid that
+  # cannot write the caller's files; keep-id plus -u runs as the caller instead.
   podman container run \
     --name "replace_fonts_$(uuidgen | head -c8)" \
     --rm \
     --security-opt label=disable \
+    --userns=keep-id \
+    -u "$(id -u):$(id -g)" \
     $TTY_FLAGS \
     -v "$PWD":/work \
     ghcr.io/shakiyam/replace_fonts "$@"

@@ -17,4 +17,6 @@ COPY apply_theme_fonts.py define_theme_fonts.py logger.py replace_fonts.py ./
 WORKDIR /work
 ARG SOURCE_COMMIT
 LABEL org.opencontainers.image.revision=$SOURCE_COMMIT
+# nobody:nogroup
+USER 65534:65534
 ENTRYPOINT ["python3", "/opt/replace_fonts/replace_fonts.py"]
