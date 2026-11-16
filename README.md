@@ -25,6 +25,8 @@ Windows:
 py -m pip install -r requirements.txt
 ```
 
+You can instead run `setup.bat`, which also installs pywin32 and adds a shortcut to SendTo (see Tips).
+
 Linux/macOS:
 
 ```console
@@ -89,7 +91,7 @@ ea = "Meiryo"
 Tips
 ----
 
-If you are using Windows, you may find it useful to add a shortcut to SendTo by doing the following
+If you are using Windows, you may find it useful to add a shortcut to SendTo by running `setup.bat` or by doing the following
 
 ```console
 py -m pip install pywin32
