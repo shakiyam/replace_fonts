@@ -17,23 +17,24 @@ Requirements
 ------------
 
 replace_fonts requires Python 3.11 or later and python-pptx.
+Install the tested versions pinned in `requirements.txt` from the project root directory (where this README.md is located).
 
 Windows:
 
 ```console
-py -m pip install python-pptx
+py -m pip install -r requirements.txt
 ```
 
 Linux/macOS:
 
 ```console
-python3 -m pip install python-pptx
+python3 -m pip install -r requirements.txt
 ```
 
 Or using uv:
 
 ```console
-uv pip install --system python-pptx
+uv pip install --system -r requirements.txt
 ```
 
 Usage

@@ -10,7 +10,7 @@ actionlint: ## Lint GitHub Actions workflow files
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/actionlint.sh
 
-all: check_for_updates format lint update_requirements_dev build_dev mypy pip_licenses pytest update_requirements build dive trivy test ## Check for updates, format, lint, update requirements.txt, build, scan image, check licenses, and test
+all: check_for_updates format lint update_uv_lock build_dev mypy pip_licenses pytest build dive trivy test ## Check for updates, format, lint, update uv.lock, build, scan image, check licenses, and test
 
 build: ## Build image 'shakiyam/replace_fonts' from Dockerfile
 	@echo -e "\033[36m$@\033[0m"
@@ -107,13 +107,11 @@ trivy: build ## Scan Docker image for vulnerabilities
 	@echo -e "\033[36m$@\033[0m"
 	@./tools/trivy.sh image --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 ghcr.io/shakiyam/replace_fonts | sed -n '/^Total:/,$$p'
 
-update_requirements: ## Update requirements.txt
+# Exporting in the same recipe keeps requirements.txt, which pip installs without containers, in step with uv.lock
+update_uv_lock: ## Update uv.lock and export requirements.txt from it
 	@echo -e "\033[36m$@\033[0m"
-	@./tools/uv.sh pip compile --upgrade --strip-extras --output-file requirements.txt pyproject.toml
-
-update_requirements_dev: ## Update requirements_dev.txt
-	@echo -e "\033[36m$@\033[0m"
-	@./tools/uv.sh pip compile --upgrade --strip-extras --extra dev --output-file requirements_dev.txt pyproject.toml
+	@./tools/uv.sh lock --upgrade
+	@./tools/uv.sh export --locked --no-emit-project --output-file requirements.txt
 
 yamlfmt: ## Format YAML files
 	@echo -e "\033[36m$@\033[0m"
